@@ -163,6 +163,8 @@ module.exports = {
     // If not set, the following default order is used:
     //paletteCategories: ['subflows', 'input', 'output', 'function', 'social', 'mobile', 'storage', 'analysis', 'advanced'],
 
+    storageModule: require("./red/runtime/storage/redis"),
+
     // Configure the logging output
     logging: {
         // Only console logging is currently supported

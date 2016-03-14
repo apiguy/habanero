@@ -25,6 +25,8 @@ var nopt = require("nopt");
 var path = require("path");
 var fs = require("fs-extra");
 var RED = require("./red/red.js");
+var redis = require("redis"),
+    client = redis.createClient();
 
 var server;
 var app = express();
@@ -178,6 +180,28 @@ try {
     }
     process.exit(1);
 }
+
+var xivelyCredentialsSaved = false;
+var xivelyCredentials = false;
+
+function xivelyMiddleware(req,res,next) {
+    if (!xivelyCredentialsSaved) {
+        client.get("xivelyCredentials", function(err, reply) {
+            if (err) {
+                console.log(err);
+                res.send(err);
+            }
+            if (reply == null) {
+                console.log("Xively credentials needed");
+                res.write("We need your Xively credentials");
+            }
+            xivelyCredentialsSaved = true;
+        });
+    }
+    next();
+}
+
+//app.use(xivelyMiddleware);
 
 function basicAuthMiddleware(user,pass) {
     var basicAuth = require('basic-auth');

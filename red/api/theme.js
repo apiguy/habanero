@@ -22,12 +22,12 @@ var clone = require("clone");
 
 var defaultContext = {
     page: {
-        title: "Node-RED",
+        title: "Xively Habenero",
         favicon: "favicon.ico"
     },
     header: {
-        title: "Node-RED",
-        image: "red/images/node-red.png"
+        title: "Habanero",
+        image: "red/images/xively-red.svg"
     },
     asset: {
         red: (process.env.NODE_ENV == "development")? "red/red.js":"red/red.min.js"
