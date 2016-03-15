@@ -64,7 +64,7 @@ var loginAttempts = [];
 var loginSignInWindow = 600000; // 10 minutes
 
 
-var passwordTokenExchange = function(client, username, password, scope, done) {
+var passwordTokenExchange = function(client, username, password, scope, requestBody, done) {
     var now = Date.now();
     loginAttempts = loginAttempts.filter(function(logEntry) {
         return logEntry.time + loginSignInWindow > now;
@@ -83,7 +83,14 @@ var passwordTokenExchange = function(client, username, password, scope, done) {
         return;
     }
 
-    Users.authenticate(username,password).then(function(user) {
+    if(requestBody["accountid"] == "")
+    {
+        log.audit({event: "auth.login.fail.credentials",username:username,client:client.id,scope:scope});
+        done(new Error("Missing account id"),false);
+        return;
+    }
+
+    Users.authenticate(username, password, requestBody["accountid"]).then(function(user) {
         if (user) {
             if (scope === "") {
                 scope = user.permissions;

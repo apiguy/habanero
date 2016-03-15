@@ -24,6 +24,7 @@ var passwords = {};
 var defaultUser = null;
 
 function authenticate(username,password) {
+    console.log("GOOOT HERE")
     var user = users[username];
     if (user) {
         return when.promise(function(resolve,reject) {
@@ -96,6 +97,6 @@ function init(config) {
 module.exports = {
     init: init,
     get: function(username) { return api.get(username) },
-    authenticate: function(username,password) { return api.authenticate(username,password) },
+    authenticate: function(username, password, accountid) { return api.authenticate(username,password,accountid) },
     default: function() { return api.default(); }
 };
