@@ -1,1 +1,1 @@
-web: node red.js
+web: node red.js --settings settings.js
