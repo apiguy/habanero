@@ -12,7 +12,7 @@
   "scripts": {
     "start": "node red.js",
     "test": "./node_modules/.bin/grunt",
-    "postinstall": "grunt build"
+    "postinstall": "grunt setDevEnv"
   },
   "bin": {
     "node-red": "./red.js",
