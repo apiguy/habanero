@@ -10,29 +10,32 @@ client.on("error", function (err) {
 });
 
 
-function saveValue (key, value) {
+function saveValue (key, value, defaultValue) {
     return when.promise(function(resolve) {
+        console.log("Redis save");
+        console.log(key);
+        console.log(value);
         client.set(key, JSON.stringify(value), function(err, reply) {
             if (!err) {
-                resolve([]);
+                return resolve(defaultValue);
             }
             log.info("Redis ERROR: " + err);
-            resolve([]);
+            resolve(defaultValue);
         });
     });
 }
 
-function getValue(key) {
+function getValue(key, defaultValue) {
     return when.promise(function(resolve) {
         client.get(key, function(err, reply) {
             if (!err) {
                 if (reply == null) {
-                    return resolve([]);
+                    return resolve(defaultValue);
                 }
                 return resolve(JSON.parse(reply));
             }
             log.info("Redis ERROR: " + err);
-            return resolve([]);
+            return resolve(defaultValue);
         });
     });
 }
@@ -44,35 +47,35 @@ module.exports = {
         
     },
     getFlows: function() {
-        return getValue("flows");
+        return getValue("flows", []);
     },
     saveFlows: function(flows) {
         if (settings.readOnly) {
             return when.resolve();
         }
 
-        return saveValue("flows", flows);
+        return saveValue("flows", flows, []);
     },
     getCredentials: function() {
-        return getValue("credentials");
+        return getValue("credentials", {});
     },
     saveCredentials: function (credentials) {
-        return saveValue("credentials", credentials);
+        return saveValue("credentials", credentials, {});
     },
     getSettings: function() {
-        return getValue("settings");
+        return getValue("settings", {});
     },
     saveSettings: function() {
-        return saveValue("settings", settings);
+        return saveValue("settings", settings, {});
     },
     getSessions: function () {
-        return getValue("sessions");
+        return getValue("sessions", {});
     },
     saveSessions: function(sessions) {
-        return saveValue("sessions", sessions);
+        return saveValue("sessions", sessions, {});
     },
     getLibraryEntry: function(type, name) {
-        return getValue(type + "::" + name);
+        return getValue(type + "::" + name, {});
     },
     saveLibraryEntry: function(type, name, meta, body) {}
 };
