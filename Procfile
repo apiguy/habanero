@@ -1,0 +1,1 @@
+web: node red.js --settings settings.js

@@ -18,6 +18,8 @@
 // to make it available:
 //var fs = require("fs");
 
+console.log(__dirname);
+
 module.exports = {
     // the tcp port that the Node-RED web server is listening on
     uiPort: 1880,
@@ -163,7 +165,7 @@ module.exports = {
     // If not set, the following default order is used:
     //paletteCategories: ['subflows', 'input', 'output', 'function', 'social', 'mobile', 'storage', 'analysis', 'advanced'],
 
-    storageModule: require("./red/runtime/storage/redis"),
+    storageModule: require(__dirname + "/red/runtime/storage/redis.js"),
 
     // Configure the logging output
     logging: {

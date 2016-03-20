@@ -1,7 +1,9 @@
 
 var when = require('when');
 var redis = require('redis'),
-    client = redis.createClient();
+    client = redis.createClient({
+        url: process.env.REDIS_URL
+    });
 var settings;
 var log = require("../log");
 
