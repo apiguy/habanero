@@ -22,28 +22,23 @@
 <!-- First, the content of the edit dialog is defined.                       -->
 
 <script type="text/x-red" data-template-name="xively">
-   <!-- data-template-name identifies the node type this is for              -->
-
-   <!-- Each of the following divs creates a field in the edit dialog.       -->
-   <!-- Generally, there should be an input for each property of the node.   -->
-   <!-- The for and id attributes identify the corresponding property        -->
-   <!-- (with the 'node-input-' prefix).                                     -->
-   <!-- The available icon classes are defined Font Awesome Icons (FA Icons) -->
-    <div class="form-row">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
-        <select name="node-input-devicetype" id="node-input-devicetype">
-            <option value="AirSoClean 3000">AirSoClean 3000</option>
-            <option value="AirSoClean 4000">AirSoClean 4000</option>
-            <option value="AirSoClean 9000">AirSoClean 9000</option>
+   <div class="form-row">
+        <label for="xively-input-devicetype"><i class="fa fa-tasks"></i> Device Type</label>
+        <select name="xively-input-devicetype" id="xively-input-devicetype">
+            <option>Select a device type...</option>
+            <option value="asc">AirSoClean 3000</option>
+            <option value="hvac">Industry HVAC 7200</option>
         </select>
     </div>
-
-    <br/>
-    <!-- By convention, most nodes have a 'name' property. The following div -->
-    <!-- provides the necessary field. Should always be the last option      -->
+    
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="xively-input-channel-type"><i class="fa fa-tasks"></i> Channel</label>
+        <select name="xively-input-channel-type" id="xively-input-channel-type">
+            <option>Select a channel type...</option>
+            <option value="ctrl">Control</option>
+            <option value="sensor">Sensor</option>
+            <option value="logs">Logs</option>
+        </select>
     </div>
 </script>
 
@@ -54,10 +49,7 @@
    <!-- This content appears in the Info sidebar when a node is selected     -->
    <!-- The first <p> is used as the pop-up tool tip when hovering over a    -->
    <!-- node in the palette.                                                 -->
-   <p>Simple sample input node. Just sends a single message when it starts up.
-   This is not very useful.</p>
-   <p>Outputs an object called <b>msg</b> containing <b>msg.topic</b> and
-   <b>msg.payload</b>. msg.payload is a String.</p>
+   <p>Connects to Xively and streams in data from devices.</p>
 </script>
 
 <!-- Finally, the node type is registered along with all of its properties   -->
@@ -69,15 +61,19 @@
             name: {value:""},   //  along with default values.
             topic: {value:"", required:true}
         },
-        inputs:1,               // set the number of inputs - only 0 or 1
+        inputs:0,               // set the number of inputs - only 0 or 1
         outputs:1,              // set the number of outputs - 0 to n
         // set the icon (held in icons dir below where you save the node)
-        icon: "myicon.png",     // saved in  icons/myicon.png
+        icon: "inject.png",     // saved in  icons/myicon.png
         label: function() {     // sets the default label contents
-            return this.name||this.topic||"xively";
+            return "xively";
         },
         labelStyle: function() { // sets the class to apply to the label
-            return this.name?"node_label_italic":"";
+            return "node_label_italic";
+        },
+        oneditprepare: function() {
+            // Do before edit window pops up
+            // good place to hook ui events up and such
         }
     });
 </script>
