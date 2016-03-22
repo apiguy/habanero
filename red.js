@@ -25,8 +25,6 @@ var nopt = require("nopt");
 var path = require("path");
 var fs = require("fs-extra");
 var RED = require("./red/red.js");
-var redis = require("redis"),
-    client = redis.createClient();
 
 var server;
 var app = express();
