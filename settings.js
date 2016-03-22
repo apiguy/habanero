@@ -86,7 +86,7 @@ module.exports = {
     // -----------------
     // To password protect the Node-RED editor and admin API, the following
     // property can be used. See http://nodered.org/docs/security.html for details.
-    adminAuth: require("./xi/xi-authentication"),
+    adminAuth: require("node-red-contrib-xively").habanero.adminAuth,
 
     // To password protect the node-defined HTTP endpoints (httpNodeRoot), or
     // the static content (httpStatic), the following properties can be used.
@@ -154,7 +154,7 @@ module.exports = {
     // palette. If a node's category is not in the list, the category will get
     // added to the end of the palette.
     // If not set, the following default order is used:
-    //paletteCategories: ['subflows', 'input', 'output', 'function', 'social', 'mobile', 'storage', 'analysis', 'advanced'],
+    paletteCategories: ['subflows', 'xively', 'input', 'output', 'function', 'social', 'mobile', 'storage', 'analysis', 'advanced'],
 
     storageModule: require("./red/runtime/storage/redis"),
 
@@ -177,4 +177,4 @@ module.exports = {
             audit: false
         }
     }
-}
+};

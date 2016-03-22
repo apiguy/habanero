@@ -24,6 +24,8 @@ var permissions = require("./permissions");
 
 var theme = require("../theme");
 
+var xiRed = require("node-red-contrib-xively");
+
 var settings = null;
 var log = null
 
@@ -83,14 +85,25 @@ function login(req,res) {
     if (settings.adminAuth) {
         response = {
             "type":"credentials",
-            "prompts":[{id:"username",type:"text",label:"Username"},{id:"password",type:"password",label:"Password"},{id:"accountid",type:"text",label:"Account Id"}],
+            "prompts":[{id:"username",type:"text",label:"Username"},{id:"password",type:"password",label:"Password"}],
             "image": "red/images/xively.png"
         }
+
         if (theme.context().login && theme.context().login.image) {
             response.image = theme.context().login.image;
         }
+
+        xiRed.habanero.settings.get().then(function(hSettings){
+            if(hSettings === null){
+                response.prompts.push(
+                    {id:"accountId",type:"text",label:"Account Id"},
+                    {id:"appId",type:"text",label:"App Id"},
+                    {id:"accessToken",type:"password",label:"Access Token"}
+                );
+            }
+            res.json(response);
+        }); 
     }
-    res.json(response);
 }
 
 function revoke(req,res) {

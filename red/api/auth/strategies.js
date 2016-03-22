@@ -83,34 +83,32 @@ var passwordTokenExchange = function(client, username, password, scope, requestB
         return;
     }
 
-    if(requestBody["accountid"] == "")
-    {
-        log.audit({event: "auth.login.fail.credentials",username:username,client:client.id,scope:scope});
-        done(new Error("Missing account id"),false);
-        return;
-    }
-
-    Users.authenticate(username, password, requestBody["accountid"]).then(function(user) {
-        if (user) {
-            if (scope === "") {
-                scope = user.permissions;
-            }
-            if (permissions.hasPermission(user.permissions,scope)) {
-                loginAttempts = loginAttempts.filter(function(logEntry) {
-                    return logEntry.user !== username;
-                });
-                Tokens.create(username,client.id,scope).then(function(tokens) {
-                    log.audit({event: "auth.login",username:username,client:client.id,scope:scope});
-                    done(null,tokens.accessToken,null,{expires_in:tokens.expires_in});
-                });
+    Users.authenticate(
+        username, 
+        password, 
+        requestBody["accountId"], 
+        requestBody["appId"], 
+        requestBody["accessToken"]).then(function(user) {
+            if (user) {
+                if (scope === "") {
+                    scope = user.permissions;
+                }
+                if (permissions.hasPermission(user.permissions,scope)) {
+                    loginAttempts = loginAttempts.filter(function(logEntry) {
+                        return logEntry.user !== username;
+                    });
+                    Tokens.create(username,client.id,scope).then(function(tokens) {
+                        log.audit({event: "auth.login",username:username,client:client.id,scope:scope});
+                        done(null,tokens.accessToken,null,{expires_in:tokens.expires_in});
+                    });
+                } else {
+                    log.audit({event: "auth.login.fail.permissions",username:username,client:client.id,scope:scope});
+                    done(null,false);
+                }
             } else {
-                log.audit({event: "auth.login.fail.permissions",username:username,client:client.id,scope:scope});
+                log.audit({event: "auth.login.fail.credentials",username:username,client:client.id,scope:scope});
                 done(null,false);
             }
-        } else {
-            log.audit({event: "auth.login.fail.credentials",username:username,client:client.id,scope:scope});
-            done(null,false);
-        }
     });
 }
 

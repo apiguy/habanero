@@ -12,9 +12,6 @@ client.on("error", function (err) {
 
 function saveValue (key, value, defaultValue) {
     return when.promise(function(resolve) {
-        console.log("Redis save");
-        console.log(key);
-        console.log(value);
         client.set(key, JSON.stringify(value), function(err, reply) {
             if (!err) {
                 return resolve(defaultValue);
@@ -75,7 +72,7 @@ module.exports = {
         return saveValue("sessions", sessions, {});
     },
     getLibraryEntry: function(type, name) {
-        return getValue(type + "::" + name, {});
+        return getValue(type + "::" + name, []);
     },
     saveLibraryEntry: function(type, name, meta, body) {}
 };
