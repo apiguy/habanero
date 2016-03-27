@@ -65,7 +65,7 @@
     "media-typer": "0.3.0",
     "mqtt": "1.6.3",
     "mustache": "2.2.1",
-    "node-red-contrib-xively": "0.1.3",
+    "node-red-contrib-xively": "0.1.4",
     "node-red-node-email": "0.1.*",
     "node-red-node-feedparser": "0.1.*",
     "node-red-node-forecastio": "^0.1.3",
