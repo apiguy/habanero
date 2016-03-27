@@ -19,3 +19,4 @@ locales/zz-ZZ
 nodes/core/locales/zz-ZZ
 .idea*
 build/*.js
+certs/*

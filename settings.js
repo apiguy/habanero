@@ -103,10 +103,10 @@ module.exports = {
     // See the comment at the top of this file on how to load the `fs` module used by
     // this setting.
     //
-    //https: {
-    //    key: fs.readFileSync('privatekey.pem'),
-    //    cert: fs.readFileSync('certificate.pem')
-    //},
+    // https: {
+    //    key: fs.readFileSync('./certs/key.pem'),
+    //    cert: fs.readFileSync('./certs/certificate.pem')
+    // },
 
     // The following property can be used to disable the editor. The admin API
     // is not affected by this option. To disable both the editor and the admin
