@@ -77,6 +77,7 @@ function init(_server,runtime) {
             var editorApp = express();
             editorApp.get("/",ui.ensureSlash,ui.editor);
             editorApp.get("/icons/:icon",ui.icon);
+            editorApp.post("/enableSession",ui.enableSession);
             theme.init(runtime);
             if (settings.editorTheme) {
                 editorApp.use("/theme",theme.app());

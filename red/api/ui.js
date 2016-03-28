@@ -27,6 +27,7 @@ var iconCache = {};
 var defaultIcon = path.resolve(__dirname + '/../../public/icons/arrow-in.png');
 var templateDir = path.resolve(__dirname+"/../../editor/templates");
 var editorTemplate;
+var enableSession;
 
 function nodeIconDir(dir) {
     icon_paths.push(path.resolve(dir));
@@ -35,6 +36,7 @@ function nodeIconDir(dir) {
 module.exports = {
     init: function(runtime) {
         editorTemplate = fs.readFileSync(path.join(templateDir,"index.mst"),"utf8");
+        enableSession = fs.readFileSync(path.join(templateDir,"enableSession.mst"),"utf8");
         Mustache.parse(editorTemplate);
         // TODO: this allows init to be called multiple times without
         //       registering multiple instances of the listener.
@@ -70,6 +72,14 @@ module.exports = {
             }
             res.sendFile(defaultIcon);
         }
+    },
+    enableSession: function(req,res){
+        var loginResp = new Buffer(req.param.ticket, 'base64').toString('utf8');
+        var session ={access_token:req.body.access_token, expires_in:req.body.expires_in};
+        session = JSON.stringify(loginResp);
+        var conext = theme.context();
+        context.session = session;
+        res.send(Mustache.render(enableSession,context));
     },
     editor: function(req,res) {
         res.send(Mustache.render(editorTemplate,theme.context()));
