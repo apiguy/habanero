@@ -75,7 +75,6 @@ module.exports = {
     },
     enableSession: function(req,res){
         var loginResp = new Buffer(req.query.ticket, 'base64').toString('utf8');
-        var session ={access_token:req.body.access_token, expires_in:req.body.expires_in};
         session = JSON.stringify(loginResp);
         var conext = theme.context();
         context.session = session;
