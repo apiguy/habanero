@@ -76,7 +76,7 @@ module.exports = {
     enableSession: function(req,res){
         var loginResp = new Buffer(req.query.ticket, 'base64').toString('utf8');
         session = JSON.stringify(loginResp);
-        var conext = theme.context();
+        var context = theme.context();
         context.session = session;
         res.send(Mustache.render(enableSession,context));
     },
