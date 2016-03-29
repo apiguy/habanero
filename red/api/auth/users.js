@@ -97,6 +97,6 @@ function init(config) {
 module.exports = {
     init: init,
     get: function(username) { return api.get(username) },
-    authenticate: function(username, password,accountId,appId,accessToken) { return api.authenticate(username,password,accountId,appId,accessToken) },
+    authenticate: function(username, password, requestBody) { return api.authenticate(username,password,requestBody); },
     default: function() { return api.default(); }
 };

@@ -86,9 +86,7 @@ var passwordTokenExchange = function(client, username, password, scope, requestB
     Users.authenticate(
         username, 
         password, 
-        requestBody["accountId"], 
-        requestBody["appId"], 
-        requestBody["accessToken"]).then(function(user) {
+        requestBody).then(function(user) {
             if (user) {
                 if (scope === "") {
                     scope = user.permissions;
