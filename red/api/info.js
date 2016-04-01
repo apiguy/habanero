@@ -37,6 +37,10 @@ module.exports = {
             safeSettings.paletteCategories = settings.paletteCategories;
         }
 
+        if (util.isArray(settings.paletteExcludeNodeTypes)) {
+            safeSettings.paletteExcludeNodeTypes = settings.paletteExcludeNodeTypes;
+        }
+
         res.json(safeSettings);
     }
 }

@@ -15,8 +15,9 @@
  **/
 
 RED.palette = (function() {
-
+    
     var exclusion = ['config','unknown','deprecated'];
+    var nodeTypeExclusions = [];
     var core = ['subflows', 'input', 'output', 'function', 'social', 'mobile', 'storage', 'analysis', 'advanced'];
 
     var categoryContainers = {};
@@ -125,6 +126,11 @@ RED.palette = (function() {
         if ($("#palette_node_"+nodeTypeId).length) {
             return;
         }
+
+        if (nodeTypeExclusions.indexOf(nt)>=0) {
+            return;
+        }
+
         if (exclusion.indexOf(def.category)===-1) {
 
             var category = def.category.replace(" ","_");
@@ -391,6 +397,7 @@ RED.palette = (function() {
     }
 
     function init() {
+        nodeTypeExclusions = RED.settings.paletteExcludeNodeTypes || [];
         $(".palette-spinner").show();
         if (RED.settings.paletteCategories) {
             RED.settings.paletteCategories.forEach(function(category){

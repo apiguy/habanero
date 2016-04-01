@@ -156,7 +156,22 @@ module.exports = {
     // palette. If a node's category is not in the list, the category will get
     // added to the end of the palette.
     // If not set, the following default order is used:
-    paletteCategories: ['subflows', 'xively', 'input', 'output', 'filter', 'function', 'social', 'mobile', 'storage', 'analysis', 'advanced'],
+    paletteCategories: ['subflows', 'xively', 'input', 'output', 'filter', 'function', 'weather', 'social', 'mobile', 'storage', 'analysis', 'advanced'],
+
+    // The following list of node types will not show up in the pallette
+    paletteExcludeNodeTypes : [
+        // input category
+        "mqtt in",
+        "serial in",
+        "tcp in",
+        "udp in",
+        // output category
+        "mqtt out",
+        "tcp out",
+        "udp out",
+        "serial out"
+    ],
+
 
     storageModule: require(__dirname + "/red/runtime/storage/redis.js"),
 
