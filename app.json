@@ -1,7 +1,7 @@
 {
   "name": "Xively Habanero",
   "description": "One click deployment rules, workflow, and integration engine for Xively.",
-  "repository": "https://github.com/apiguy/habanero",
+  "repository": "https://github.com/xively/habanero",
   "logo": "https://node-js-sample.herokuapp.com/node.png",
   "keywords": ["xively", "iot"],
   "addons": ["heroku-redis:hobby-dev"]
