@@ -160,6 +160,10 @@ module.exports = {
 
     // The following list of node types will not show up in the pallette
     paletteExcludeNodeTypes : [
+        // storage
+        "file",
+        "file in",
+        "tail",
         // advanced category
         "exec",
         "watch",
