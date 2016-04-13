@@ -127,6 +127,17 @@
         "spawn": "Use spawn() instead of exec()?",
         "tip": "Tip: <i>spawn</i> expects only one command word - and appended args to be comma separated."
     },
+    "feedparse": {
+        "label": {
+            "feedurl": "Feed url",
+            "refresh": "Refresh",
+            "minutes": "minutes"
+        },
+        "errors": {
+            "badstatuscode": "error - Bad status code",
+            "invalidurl": "Invalid url"
+        }
+    },
     "function": {
         "label": {
             "function": "Function",

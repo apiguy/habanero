@@ -160,6 +160,9 @@ module.exports = {
 
     // The following list of node types will not show up in the pallette
     paletteExcludeNodeTypes : [
+        // advanced category
+        "exec",
+        "watch",
         // input category
         "mqtt in",
         "serial in",
