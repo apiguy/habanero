@@ -125,7 +125,7 @@ module.exports = function(grunt) {
                   "editor/js/ui/notifications.js",
                   "editor/js/ui/subflow.js",
                   "editor/js/ui/touch/radialMenu.js",
-                  "editor/js/ui/typedInput.js"
+                  "node_modules/node-red-contrib-xively/xi/habanero/editor/js/ui/typedInput.js"
               ],
               dest: "public/red/red.js"
             },
