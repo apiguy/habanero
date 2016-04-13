@@ -24,9 +24,13 @@ RED.palette = (function() {
 
     function createCategoryContainer(category, label){
         label = label || category.replace("_", " ");
+
+        var defaultOpen = category === "xively";
+        var catBaseStyle = (defaultOpen) ? "" : "display:none;";
+
         var catDiv = $('<div id="palette-container-'+category+'" class="palette-category palette-close hide">'+
             '<div id="palette-header-'+category+'" class="palette-header"><i class="expanded fa fa-angle-down"></i><span>'+label+'</span></div>'+
-            '<div class="palette-content" id="palette-base-category-'+category+'">'+
+            '<div class="palette-content" id="palette-base-category-'+category+'" style="'+catBaseStyle+'">'+
             '<div id="palette-'+category+'-input"></div>'+
             '<div id="palette-'+category+'-output"></div>'+
             '<div id="palette-'+category+'-function"></div>'+
@@ -311,7 +315,7 @@ RED.palette = (function() {
             setLabel(nt,$(d),label,nodeInfo);
 
             var categoryNode = $("#palette-container-"+category);
-            if (categoryNode.find(".palette_node").length === 1) {
+            if (categoryNode.find(".palette_node").length === 1 && category === "xively") {
                 categoryContainers[category].open();
             }
 
