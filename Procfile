@@ -1,1 +1,1 @@
-web: node red.js --settings settings.js -v
+web: node red.js --settings settings.js -v 
