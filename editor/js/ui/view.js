@@ -1493,11 +1493,13 @@ RED.view = (function() {
                     }
 
                     var mainRect = node.append("rect")
-                        .attr("class", "node")
+                        .attr("class", "node xi_rect_node")
                         .classed("node_unknown",function(d) { return d.type == "unknown"; })
-                        .attr("rx", 5)
-                        .attr("ry", 5)
+                        .attr("rx", 15)
+                        .attr("ry", 15)
+                        .attr("style", function(d) { return 'stroke:'+d._def.color+';'})
                         .attr("fill",function(d) { return d._def.color;})
+                        .attr("fill-opacity",function(d) {return (d._def.opaque == "true") ? 1.0 : 0.0;})
                         .on("mouseup",nodeMouseUp)
                         .on("mousedown",nodeMouseDown)
                         .on("touchstart",function(d) {
@@ -1540,14 +1542,14 @@ RED.view = (function() {
                             .attr("class","node_icon_group")
                             .attr("x",0).attr("y",0);
 
-                        var icon_shade = icon_group.append("rect")
-                            .attr("x",0).attr("y",0)
-                            .attr("class","node_icon_shade")
-                            .attr("width","30")
-                            .attr("stroke","none")
-                            .attr("fill","#000")
-                            .attr("fill-opacity","0.05")
-                            .attr("height",function(d){return Math.min(50,d.h-4);});
+                        // var icon_shade = icon_group.append("rect")
+                        //     .attr("x",0).attr("y",0)
+                        //     .attr("class","node_icon_shade")
+                        //     .attr("width","30")
+                        //     .attr("stroke","none")
+                        //     .attr("fill","#000")
+                        //     .attr("fill-opacity","0.05")
+                        //     .attr("height",function(d){return Math.min(50,d.h-4);});
 
                         var icon = icon_group.append("image")
                             .attr("xlink:href","icons/"+d._def.icon)
@@ -1556,16 +1558,16 @@ RED.view = (function() {
                             .attr("width","30")
                             .attr("height","30");
 
-                        var icon_shade_border = icon_group.append("path")
-                            .attr("d",function(d) { return "M 30 1 l 0 "+(d.h-2)})
-                            .attr("class","node_icon_shade_border")
-                            .attr("stroke-opacity","0.1")
-                            .attr("stroke","#000")
-                            .attr("stroke-width","1");
+                        // var icon_shade_border = icon_group.append("path")
+                        //     .attr("d",function(d) { return "M 30 1 l 0 "+(d.h-2)})
+                        //     .attr("class","node_icon_shade_border")
+                        //     .attr("stroke-opacity","0.1")
+                        //     .attr("stroke","#000")
+                        //     .attr("stroke-width","1");
 
                         if ("right" == d._def.align) {
                             icon_group.attr('class','node_icon_group node_icon_group_'+d._def.align);
-                            icon_shade_border.attr("d",function(d) { return "M 0 1 l 0 "+(d.h-2)})
+                            //icon_shade_border.attr("d",function(d) { return "M 0 1 l 0 "+(d.h-2)})
                             //icon.attr('class','node_icon node_icon_'+d._def.align);
                             //icon.attr('class','node_icon_shade node_icon_shade_'+d._def.align);
                             //icon.attr('class','node_icon_shade_border node_icon_shade_border_'+d._def.align);
@@ -1585,7 +1587,7 @@ RED.view = (function() {
                         img.onload = function() {
                             icon.attr("width",Math.min(img.width,30));
                             icon.attr("height",Math.min(img.height,30));
-                            icon.attr("x",15-Math.min(img.width,30)/2);
+                            icon.attr("x",7);
                             //if ("right" == d._def.align) {
                             //    icon.attr("x",function(d){return d.w-img.width-1-(d.outputs>0?5:0);});
                             //    icon_shade.attr("x",function(d){return d.w-30});
@@ -1596,7 +1598,7 @@ RED.view = (function() {
                         //icon.style("pointer-events","none");
                         icon_group.style("pointer-events","none");
                     }
-                    var text = node.append('svg:text').attr('class','node_label').attr('x', 38).attr('dy', '.35em').attr('text-anchor','start');
+                    var text = node.append('svg:text').attr('class','node_label').attr('x', 45).attr('dy', '.35em').attr('text-anchor','start').attr('style', "fill:"+d._def.color+";");
                     if (d._def.align) {
                         text.attr('class','node_label node_label_'+d._def.align);
                         if (d._def.align === "right") {
@@ -1665,7 +1667,7 @@ RED.view = (function() {
                                 //nodeLabel.attr("x",30);
                             } else if (d.inputs === 1 && inputPorts.empty()) {
                                 var inputGroup = thisNode.append("g").attr("class","port_input");
-                                inputGroup.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",10).attr("height",10)
+                                inputGroup.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",5).attr("height",5)
                                     .on("mousedown",function(d){portMouseDown(d,1,0);})
                                     .on("touchstart",function(d){portMouseDown(d,1,0);})
                                     .on("mouseup",function(d){portMouseUp(d,1,0);} )
@@ -1680,7 +1682,7 @@ RED.view = (function() {
                             d._ports = thisNode.selectAll(".port_output").data(d.ports);
                             var output_group = d._ports.enter().append("g").attr("class","port_output");
 
-                            output_group.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",10).attr("height",10)
+                            output_group.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",5).attr("height",5)
                                 .on("mousedown",(function(){var node = d; return function(d,i){portMouseDown(node,0,i);}})() )
                                 .on("touchstart",(function(){var node = d; return function(d,i){portMouseDown(node,0,i);}})() )
                                 .on("mouseup",(function(){var node = d; return function(d,i){portMouseUp(node,0,i);}})() )
@@ -1692,11 +1694,11 @@ RED.view = (function() {
                             if (d._ports) {
                                 numOutputs = d.outputs || 1;
                                 y = (d.h/2)-((numOutputs-1)/2)*13;
-                                var x = d.w - 5;
+                                var x = d.w - 2.5;
                                 d._ports.each(function(d,i) {
                                         var port = d3.select(this);
                                         //port.attr("y",(y+13*i)-5).attr("x",x);
-                                        port.attr("transform", function(d) { return "translate("+x+","+((y+13*i)-5)+")";});
+                                        port.attr("transform", function(d) { return "translate("+x+","+((y+13*i)-2.5)+")";});
                                 });
                             }
                             thisNode.selectAll('text.node_label').text(function(d,i){
@@ -1768,12 +1770,12 @@ RED.view = (function() {
 
                             thisNode.selectAll(".port_input").each(function(d,i) {
                                     var port = d3.select(this);
-                                    port.attr("transform",function(d){return "translate(-5,"+((d.h/2)-5)+")";})
+                                    port.attr("transform",function(d){return "translate(-2.5,"+((d.h/2)-2.5)+")";})
                             });
 
                             thisNode.selectAll(".node_icon").attr("y",function(d){return (d.h-d3.select(this).attr("height"))/2;});
-                            thisNode.selectAll(".node_icon_shade").attr("height",function(d){return d.h;});
-                            thisNode.selectAll(".node_icon_shade_border").attr("d",function(d){ return "M "+(("right" == d._def.align) ?0:30)+" 1 l 0 "+(d.h-2)});
+                            //thisNode.selectAll(".node_icon_shade").attr("height",function(d){return d.h;});
+                            //thisNode.selectAll(".node_icon_shade_border").attr("d",function(d){ return "M "+(("right" == d._def.align) ?0:30)+" 1 l 0 "+(d.h-2)});
 
                             thisNode.selectAll('.node_button').attr("opacity",function(d) {
                                 return (activeSubflow||d.changed)?0.4:1

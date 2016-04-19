@@ -157,6 +157,8 @@ RED.palette = (function() {
 
             d.className="palette_node";
 
+            d.style["border-color"] = def.color;
+            d.style["color"] = def.color;
 
             if (def.icon) {
                 var icon_url = "arrow-in.png";
@@ -169,7 +171,7 @@ RED.palette = (function() {
                 $('<div/>',{class:"palette_icon",style:"background-image: url(icons/"+icon_url+")"}).appendTo(iconContainer);
             }
 
-            d.style.backgroundColor = def.color;
+            d.style.backgroundColor =  (def.opaque == "true") ? def.color : "transparent";
 
             if (def.outputs > 0) {
                 var portOut = document.createElement("div");

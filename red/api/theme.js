@@ -27,7 +27,7 @@ var defaultContext = {
     },
     header: {
         title: "Habanero",
-        image: "red/images/xively-red.svg"
+        image: "red/images/xively-red.png"
     },
     asset: {
         red: (process.env.NODE_ENV == "development")? "red/red.js":"red/red.min.js"

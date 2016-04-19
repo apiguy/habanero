@@ -62,7 +62,7 @@
 .node_label {
     stroke-width: 0;
     fill: #333;
-    font-size: 14px;
+    font-size: 16px;
     pointer-events: none;
     -webkit-touch-callout: none;
     @include disable-selection;
@@ -86,12 +86,13 @@
 .node {
     stroke: #999;
     cursor: move;
-    stroke-width: 1;
+    stroke-width: 2;
 }
 .node_unknown {
     stroke-dasharray:10,4;
     stroke: #f33;
 }
+
 .tool_arrow {
     stroke-width: 1;
     stroke: #999;
@@ -117,7 +118,7 @@
 .port {
     stroke: #999;
     stroke-width: 1;
-    fill: #ddd;
+    fill: black;
     cursor: crosshair;
 }
 
@@ -199,8 +200,8 @@
 }
 
 .link_line {
-    stroke: $link-color;
-    stroke-width: 3;
+    stroke: black;
+    stroke-width: 1;
     fill: none;
     pointer-events: none;
 }

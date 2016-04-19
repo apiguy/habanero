@@ -29,11 +29,15 @@ $link-unknown-color: #f00;
 $primary-border-color: #bbbbbb;
 $secondary-border-color: #dddddd;
 
+$primary-dark-color: #232435;
+
 $tab-background-active: #fff;
-$tab-background-inactive: #f0f0f0;
+$tab-background-inactive: $primary-dark-color;
 $tab-background-hover: #ddd;
 
 $palette-header-background: #f3f3f3;
+
+$xively-habanero: #EF4B38;
 
 $workspace-button-background: #fff;
 $workspace-button-background-hover: #ddd;
