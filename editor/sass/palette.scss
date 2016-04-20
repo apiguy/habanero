@@ -172,15 +172,14 @@
 }
 .palette_port {
     position: absolute;
-    top:8px;
+    top:7px;
     left: -5px;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
-    background:#d9d9d9;
+    background:black;
     border-radius: 3px;
-    width: 10px;
-    height: 10px;
-    border: 1px solid #999;
+    width: 7px;
+    height: 7px;
 }
 .palette_port_output {
     left:auto;
@@ -188,8 +187,8 @@
 }
 
 .palette_node:hover .palette_port {
-    border-color: #999;
-    background-color: #eee;
+    border-color: black;
+    background-color: black;
 }
 .palette_icon_container {
     position: absolute;

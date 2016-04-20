@@ -165,7 +165,7 @@
     },
     "palette": {
         "noInfo": "no information available",
-        "filter": "filter nodes",
+        "filter": " FILTER NODES",
         "label": {
             "subflows": "subflows",
             "input": "input",

@@ -29,7 +29,7 @@ RED.palette = (function() {
         var catBaseStyle = (defaultOpen) ? "" : "display:none;";
 
         var catDiv = $('<div id="palette-container-'+category+'" class="palette-category palette-close hide">'+
-            '<div id="palette-header-'+category+'" class="palette-header"><i class="expanded fa fa-angle-down"></i><span>'+label+'</span></div>'+
+            '<div id="palette-header-'+category+'" class="palette-header"><i class="expanded fa fa-angle-down"></i><span>'+label.toUpperCase()+'</span></div>'+
             '<div class="palette-content" id="palette-base-category-'+category+'" style="'+catBaseStyle+'">'+
             '<div id="palette-'+category+'-input"></div>'+
             '<div id="palette-'+category+'-output"></div>'+
@@ -69,7 +69,7 @@ RED.palette = (function() {
         var nodeWidth = 82;
         var nodeHeight = 25;
         var lineHeight = 20;
-        var portHeight = 10;
+        var portHeight = 7;
 
         var words = label.split(/[ -]/);
 
@@ -98,7 +98,7 @@ RED.palette = (function() {
         var labelElement = el.find(".palette_label");
         labelElement.html(lines);
 
-        el.find(".palette_port").css({top:(multiLineNodeHeight/2-5)+"px"});
+        el.find(".palette_port").css({top:(multiLineNodeHeight/2-3)+"px"});
 
         var popOverContent;
         try {

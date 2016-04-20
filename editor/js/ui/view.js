@@ -1667,7 +1667,7 @@ RED.view = (function() {
                                 //nodeLabel.attr("x",30);
                             } else if (d.inputs === 1 && inputPorts.empty()) {
                                 var inputGroup = thisNode.append("g").attr("class","port_input");
-                                inputGroup.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",5).attr("height",5)
+                                inputGroup.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",7).attr("height",7)
                                     .on("mousedown",function(d){portMouseDown(d,1,0);})
                                     .on("touchstart",function(d){portMouseDown(d,1,0);})
                                     .on("mouseup",function(d){portMouseUp(d,1,0);} )
@@ -1682,7 +1682,7 @@ RED.view = (function() {
                             d._ports = thisNode.selectAll(".port_output").data(d.ports);
                             var output_group = d._ports.enter().append("g").attr("class","port_output");
 
-                            output_group.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",5).attr("height",5)
+                            output_group.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",7).attr("height",7)
                                 .on("mousedown",(function(){var node = d; return function(d,i){portMouseDown(node,0,i);}})() )
                                 .on("touchstart",(function(){var node = d; return function(d,i){portMouseDown(node,0,i);}})() )
                                 .on("mouseup",(function(){var node = d; return function(d,i){portMouseUp(node,0,i);}})() )
@@ -1694,11 +1694,11 @@ RED.view = (function() {
                             if (d._ports) {
                                 numOutputs = d.outputs || 1;
                                 y = (d.h/2)-((numOutputs-1)/2)*13;
-                                var x = d.w - 2.5;
+                                var x = d.w - 3.5;
                                 d._ports.each(function(d,i) {
                                         var port = d3.select(this);
                                         //port.attr("y",(y+13*i)-5).attr("x",x);
-                                        port.attr("transform", function(d) { return "translate("+x+","+((y+13*i)-2.5)+")";});
+                                        port.attr("transform", function(d) { return "translate("+x+","+((y+13*i)-3.5)+")";});
                                 });
                             }
                             thisNode.selectAll('text.node_label').text(function(d,i){
@@ -1770,7 +1770,7 @@ RED.view = (function() {
 
                             thisNode.selectAll(".port_input").each(function(d,i) {
                                     var port = d3.select(this);
-                                    port.attr("transform",function(d){return "translate(-2.5,"+((d.h/2)-2.5)+")";})
+                                    port.attr("transform",function(d){return "translate(-3.5,"+((d.h/2)-3.5)+")";})
                             });
 
                             thisNode.selectAll(".node_icon").attr("y",function(d){return (d.h-d3.select(this).attr("height"))/2;});
