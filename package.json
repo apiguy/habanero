@@ -1,6 +1,6 @@
 {
   "name": "node-red-habanero",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A visual tool for wiring the Internet of Things",
   "homepage": "https://xively.com",
   "license": "Apache-2.0",
@@ -12,7 +12,7 @@
   "scripts": {
     "start": "node red.js",
     "test": "./node_modules/.bin/grunt",
-    "postinstall": "grunt build"
+    "heroku-postbuild": "grunt build"
   },
   "bin": {
     "node-red": "./red.js",

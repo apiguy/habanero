@@ -20,3 +20,4 @@ nodes/core/locales/zz-ZZ
 .idea*
 build/*.js
 certs/*
+.DS_Store

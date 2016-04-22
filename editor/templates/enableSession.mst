@@ -9,7 +9,7 @@
 <script>
     var data = {{{session}}};
     localStorage.setItem("auth-tokens", JSON.stringify(data));
-    window.location.href = "{{redirect}}";
+    window.location.href = "{{{redirect}}}";
 </script>
 </body>
 </html>
