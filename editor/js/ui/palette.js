@@ -27,9 +27,10 @@ RED.palette = (function() {
 
         var defaultOpen = category === "xively";
         var catBaseStyle = (defaultOpen) ? "" : "display:none;";
+        var catAngleClass = (defaultOpen) ? " expanded" : "";
 
         var catDiv = $('<div id="palette-container-'+category+'" class="palette-category palette-close hide">'+
-            '<div id="palette-header-'+category+'" class="palette-header"><i class="expanded fa fa-angle-down"></i><span>'+label.toUpperCase()+'</span></div>'+
+            '<div id="palette-header-'+category+'" class="palette-header"><i class="fa fa-angle-down'+catAngleClass+'"></i><span>'+label.toUpperCase()+'</span></div>'+
             '<div class="palette-content" id="palette-base-category-'+category+'" style="'+catBaseStyle+'">'+
             '<div id="palette-'+category+'-input"></div>'+
             '<div id="palette-'+category+'-output"></div>'+
