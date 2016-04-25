@@ -21,7 +21,7 @@
     bottom: 0px;
     left:0px;
     background: #f3f3f3;
-    width: 180px;
+    width: 200px;
     text-align: center;
     @include disable-selection;
     @include component-border;
@@ -162,7 +162,7 @@
     border: 2px solid #999;
     background-position: 5% 50%;
     background-repeat: no-repeat;
-    width: 120px;
+    width: 140px;
     background-size: contain;
     position: relative;
 }
