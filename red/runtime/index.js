@@ -22,6 +22,7 @@ var log = require("./log");
 var i18n = require("./i18n");
 var events = require("./events");
 var settings = require("./settings");
+var seaglass = require("./seaglass");
 var path = require('path');
 var fs = require("fs");
 var os = require("os");
@@ -59,7 +60,6 @@ function init(userSettings,_adminApi) {
         adminApi = _adminApi;
     }
     redNodes.init(runtime);
-
 }
 
 var version;
@@ -85,6 +85,7 @@ function start() {
         })
         .then(function() { return storage.init(settings)})
         .then(function() { return settings.load(storage)})
+        .then(function() { return seaglass.start()})
         .then(function() {
 
             if (log.metric()) {

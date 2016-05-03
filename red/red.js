@@ -19,6 +19,7 @@ var path = require('path');
 
 var runtime = require("./runtime");
 var api = require("./api");
+var seaglass = require("./seaglass");
 
 process.env.NODE_RED_HOME = process.env.NODE_RED_HOME || path.resolve(__dirname+"/..");
 
@@ -53,6 +54,8 @@ module.exports = {
             userSettings.coreNodesDir = path.resolve(path.join(__dirname,"..","nodes"));
         }
 
+
+
         if (userSettings.httpAdminRoot !== false || userSettings.httpNodeRoot !== false) {
             runtime.init(userSettings,api);
             api.init(httpServer,runtime);
@@ -61,20 +64,25 @@ module.exports = {
             runtime.init(userSettings);
             apiEnabled = false;
         }
+        seaglass.init(httpServer, runtime);
         adminApp = runtime.adminApi.adminApp;
         nodeApp = runtime.adminApi.nodeApp;
         server = runtime.adminApi.server;
         return;
     },
     start: function() {
-        return runtime.start().then(function() {
+        return runtime.start()
+        .then(function(){ return seaglass.start()})
+        .then(function() {
             if (apiEnabled) {
                 return api.start();
             }
         });
     },
     stop: function() {
-        return runtime.stop().then(function() {
+        return runtime.stop()
+        .then(function(){ return seaglass.stop()})
+        .then(function() {
             if (apiEnabled) {
                 return api.stop();
             }
