@@ -156,7 +156,7 @@ module.exports = {
     // palette. If a node's category is not in the list, the category will get
     // added to the end of the palette.
     // If not set, the following default order is used:
-    paletteCategories: ['subflows', 'xively', 'input', 'output', 'filter', 'function', 'weather', 'social', 'mobile', 'storage', 'analysis', 'advanced'],
+    paletteCategories: ['subflows', 'xively', 'output', 'salesforce', 'input', 'filter', 'function', 'weather', 'social', 'analysis'],
 
     // The following list of node types will not show up in the pallette
     paletteExcludeNodeTypes : [

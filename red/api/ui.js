@@ -75,9 +75,11 @@ module.exports = {
     },
     enableSession: function(req,res){
         var loginResp = new Buffer(req.query.ticket, 'base64').toString('utf8');
+        var adminRoot = decodeURIComponent(req.query.adminRoot || '/');
         session = JSON.stringify(loginResp);
         var context = theme.context();
         context.session = loginResp;
+        context.redirect = adminRoot;
         res.send(Mustache.render(enableSession,context));
     },
     editor: function(req,res) {

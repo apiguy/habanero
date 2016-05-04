@@ -39,7 +39,7 @@
 <script type="text/javascript">
     RED.nodes.registerType('feedparse',{
         category: 'input',
-        color:"#C0DEED",
+        color:"#2952a3",
         defaults: {
             name: {value:""},
             url: {value:"", required:true},
@@ -47,9 +47,9 @@
         },
         inputs:0,
         outputs:1,
-        icon: "feed.png",
+        icon: "feed_input.png",
         label: function() {
-            return this.name||this.url;
+            return this.name||this.url||"Feedparse";
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";

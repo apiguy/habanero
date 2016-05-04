@@ -22,11 +22,11 @@ var clone = require("clone");
 
 var defaultContext = {
     page: {
-        title: "Xively Habenero",
+        title: "Xively Orchestrator",
         favicon: "favicon.ico"
     },
     header: {
-        title: "Habanero",
+        title: "Orchestrator",
         image: "red/images/xively-red.png"
     },
     asset: {
