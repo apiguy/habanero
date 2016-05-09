@@ -89,6 +89,7 @@ function init(_server,_runtime) {
             editorApp.get("/",ensureRuntimeStarted,ui.ensureSlash,ui.editor);
             editorApp.get("/icons/:icon",ui.icon);
             editorApp.get("/enableSession",ui.enableSession);
+            editorApp.get("/autologin",ui.autologin);
             theme.init(runtime);
             if (settings.editorTheme) {
                 editorApp.use("/theme",theme.app());

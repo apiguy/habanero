@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head>
+<title>Autologin</title>
+
+</head>
+<body>
+<script src="vendor/vendor.js"></script>
+<script>
+	function getParameterByName(name, url) {
+	    if (!url) url = window.location.href;
+	    name = name.replace(/[\[\]]/g, "\\$&");
+	    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+	        results = regex.exec(url);
+	    if (!results) return null;
+	    if (!results[2]) return '';
+	    return decodeURIComponent(results[2].replace(/\+/g, " "));
+	}
+	$.ajax({
+		url: '/auth/token',
+		method: 'POST',
+		data: {
+			client_id: 'node-red-editor',
+		    grant_type: 'password',
+		    scope: '',
+		    username: getParameterByName('email'),
+		    password: getParameterByName('pass'),
+		    accountId: getParameterByName('account'),
+		},
+		success: function(data, textStatus, jqXHR){
+			var data = btoa(JSON.stringify(data));
+			window.location.href = '/enableSession?ticket='+data+'&adminRoot=%2F'
+		}
+	});
+</script>
+</body>
+</html>
