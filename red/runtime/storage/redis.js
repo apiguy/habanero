@@ -22,7 +22,10 @@ client.on("error", function (err) {
 
 function saveValue (key, value, defaultValue) {
     return when.promise(function(resolve) {
-        client.set(key, JSON.stringify(value), function(err, reply) {
+        if(typeof value === "object"){
+            value = JSON.stringify(value);
+        }
+        client.set(key, value, function(err, reply) {
             if (!err) {
                 return resolve(defaultValue);
             }
@@ -39,7 +42,12 @@ function getValue(key, defaultValue) {
                 if (reply == null) {
                     return resolve(defaultValue);
                 }
-                return resolve(JSON.parse(reply));
+                try {
+                    reply = JSON.parse(reply);
+                } catch (e) {
+                    //pass
+                }
+                return resolve(reply);
             }
             log.info("Redis ERROR: " + err);
             return resolve(defaultValue);
