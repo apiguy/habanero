@@ -1,6 +1,6 @@
 {
   "name": "node-red-habanero",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "A visual tool for wiring the Internet of Things",
   "homepage": "https://xively.com",
   "license": "Apache-2.0",

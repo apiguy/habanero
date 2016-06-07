@@ -86,7 +86,7 @@ module.exports = {
     // -----------------
     // To password protect the Node-RED editor and admin API, the following
     // property can be used. See http://nodered.org/docs/security.html for details.
-    //adminAuth: require("node-red-contrib-xively").habanero.adminAuth,
+    adminAuth: require("node-red-contrib-xively").habanero.adminAuth,
 
     // To password protect the node-defined HTTP endpoints (httpNodeRoot), or
     // the static content (httpStatic), the following properties can be used.
