@@ -27,6 +27,13 @@ module.exports = function (RED) {
     var node = this;
 
     node.on('input', function (msg) {
+      var postBody = msg.payload;
+      if(msg.hasOwnProperty('_meta')){
+        postBody["_meta"] = msg._meta;
+      }
+      if(msg.hasOwnProperty('device')){
+        postBody["device"] = {id:msg.device.id};
+      }
       request.post({
         url: node.connectionUrl, 
         headers: {
