@@ -1,0 +1,213 @@
+<!--
+  Copyright 2016 LogMeIn Inc
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="xively-set-custom-field">
+    <div id="device-config" style="display:none;">
+        <div class="form-row">
+            <label for="node-input-device_template"><i class="fa fa-hdd-o"></i> <span data-i18n="xively.label.device-type"></span></label>
+            <select type="text" id="node-input-device_template" style="display: inline-block; vertical-align: middle; width:60%;">
+            </select>
+        </div>
+        <div class="form-row">
+            <label for="node-input-device_field"><i class="fa fa-caret-right"></i> <span data-i18n="xively.label.field-type"></span></label>
+            <select type="text" id="node-input-device_field" style="display: inline-block; vertical-align: middle; width:60%;">
+                <option data-i18n="xively.label.select-custom-field-type"></option>
+            </select>
+        </div>
+        <div class="form-row">
+            <label for="node-input-set_to"><span data-i18n="xively.label.set_to"></span></label>
+            <input type="text" id="node-input-set_to" style="width:245px;"/>
+        </div>
+    </div>
+    <div id="device-config-loader" style="margin: 30px auto;text-align:center;">
+        <img src="red/images/spin.svg" style="height: 30px; margin-right: 10px; " class="login-spinner"/>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name this node (optional)">
+    </div>
+    <div class="form-row" style="display:none;">
+        <input type="hidden" id="node-input-xively_creds">
+        <input type="hidden" id="node-input-default_name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="xively-set-custom-field">
+   <p>Xively input/output for a device template channel.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('xively-set-custom-field',{
+        category: 'xively',    
+        color:"#E33E2C",
+        defaults: {            
+            xively_creds: {type:"xively-user-credentials",required:true},
+            name: {value:""},   
+            default_name: {value:""},
+            device_template: {value:"", required:true},
+            device_field: {value:"", required:true},
+            set_to: {value:"payload", required:true},
+            set_to_type: { value:"msg" },
+        },
+        inputs:1,             
+        outputs:0,              
+        icon: "xi.png",    
+        label: function() {    
+            return this.name||this.default_name||"Set Custom Field";
+        },
+        labelStyle: function() { 
+            return "";
+        },
+        paletteLabel: function() {
+          return "Set Custom Field";
+        },
+        oneditprepare: function(){
+            // WOW this function is HUGE, can we find a way to clean this up?
+            var xivelyCredsInput = $("#node-input-xively_creds");
+            var deviceConfigDiv = $("#device-config");
+            var deviceConfigLoaderDiv = $("#device-config-loader");
+            var deviceTemplateInput = $("#node-input-device_template");
+            var fieldInput = $("#node-input-device_field");
+            var setToProperty = $("#node-input-set_to");
+            var templateCustomFields = {};
+
+            var selectDeviceTypeMsg = this._("xively.label.select-device-type");
+            var selectFieldTypeMsg = this._("xively.label.select-custom-field-type");
+
+            var xively_creds = this.xively_creds;
+
+            var device_template = this.device_template;
+            var device_field = this.device_field;
+
+            var node = this;
+
+            setToProperty.typedInput({default:node.set_to_type||'msg',types:['msg','flow','global']});
+
+            function setupDeviceTemplates(){
+                $.getJSON('xively/deviceTemplates/'+xively_creds,function(templates) {
+                    deviceTemplateInput.off("change", onDeviceTemplateInputChange);
+                    deviceTemplateInput.empty();
+                    deviceTemplateInput.append(new Option(selectDeviceTypeMsg, ""));
+
+                    // we want to following ajax calls to be syncronous
+                    $.ajaxSetup({async: false});
+
+                    $.each(templates, function(i, template){
+                        deviceTemplateInput.append(new Option(
+                            template.name, 
+                            template.id));
+                        $.getJSON('xively/deviceTemplates/'+xively_creds+'/customFields/'+template.id,function(fields) {
+                            templateCustomFields[template.id] = fields;
+                        });
+                    });
+
+                    // turn ajax async back on
+                    $.ajaxSetup({async: true});
+   
+                    deviceTemplateInput.prop('disabled', false);
+                    if(device_template !== "" && 
+                        deviceTemplateInput.find("option[value='" + device_template + "']").length !== 0){
+                        deviceTemplateInput.val(device_template);
+                        deviceTemplateInput.removeClass("input-error");
+                        setupCustomFields(device_template);
+                    }
+
+                    deviceTemplateInput.on("change", onDeviceTemplateInputChange);
+                    deviceConfigLoaderDiv.hide();
+                    deviceConfigDiv.show();
+                });
+            }
+
+            function setupCustomFields(deviceTemplateId){
+                fieldInput.empty();
+                fieldInput.append(new Option(selectFieldTypeMsg, ""));
+                var fields = templateCustomFields[deviceTemplateId];
+                fields = fields.concat([
+                    {name: "organizationId"},
+                    {name: "firmwareVersion"},
+                    {name: "latitude"},
+                    {name: "longitude"},
+                    {name: "externalIp"},
+                    {name: "geoIpLatitude"},
+                    {name: "geoIpLongitude"}
+                ]);
+                $.each(fields, function(i, field){
+                    var selected = field.name == device_field;
+                    fieldInput.append(new Option(
+                        field.name, 
+                        field.name));
+                });
+                fieldInput.prop('disabled', false);
+                if(device_field !== "" && 
+                    fieldInput.find("option[value='" + device_field + "']").length !== 0){
+                    fieldInput.val(device_field);
+                    fieldInput.removeClass("input-error");
+                    onCustomFieldInputChange();
+                }
+            }
+
+            function onXivelyCredsInputChange(e){
+                var currentVal = xivelyCredsInput.val();
+                if(currentVal == "" || currentVal == "_ADD_"){
+                    deviceTemplateInput.prop('disabled', 'disabled');
+                    fieldInput.prop('disabled', 'disabled');
+                }else{
+                    xively_creds = currentVal;
+                    setupDeviceTemplates();
+                }
+            }
+
+            function onDeviceTemplateInputChange(e){
+                var currentVal = deviceTemplateInput.val();
+                if(currentVal == "" || currentVal == null){
+                    fieldInput.empty();
+                    fieldInput.append(new Option(selectFieldTypeMsg, ""));
+                    fieldInput.prop('disabled', 'disabled');
+                }else{
+                    setupCustomFields(currentVal);
+                }
+            }
+
+            function onCustomFieldInputChange(e){
+                //pass
+            }
+
+            if (!xively_creds || xively_creds === "") {
+                deviceTemplateInput.prop('disabled', 'disabled');
+            }else{
+                setupDeviceTemplates();
+            }
+
+            if (!this.device_template || this.device_template === "") {
+                fieldInput.prop('disabled', 'disabled');
+            }
+
+            xivelyCredsInput.on("change", onXivelyCredsInputChange);
+            deviceTemplateInput.on("change", onDeviceTemplateInputChange);
+            fieldInput.on("change", onCustomFieldInputChange);
+
+
+        },
+        oneditsave: function(){
+            var defaultName = $.trim($("#node-input-device_template option:selected" ).text() +" - "+$("#node-input-device_channel option:selected" ).text());
+            if(defaultName !== "-"){
+                $("#node-input-default_name").val(defaultName);
+            }
+
+            this.set_to_type = $("#node-input-set_to").typedInput('type');
+        }
+    });
+</script>

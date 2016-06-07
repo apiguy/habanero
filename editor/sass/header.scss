@@ -136,7 +136,21 @@ div.logo {
     }
 }
 
-#btn-deploy {
+.help-button {
+    background: $deployButton;
+    color: #eee !important;
+
+    &:hover {
+        background: $deployButtonHover;
+    }
+
+    &:active {
+        background: $deployButtonActive;
+        color: #ccc !important;
+    }
+}
+
+#btn-deploy, #btn-help {
 
     padding: 4px 12px;
 
@@ -243,6 +257,23 @@ div.logo {
 #header ul.dropdown-menu > li.disabled:hover > a,
 #header ul.dropdown-menu > li.disabled:focus > a {
     background: none !important;
+}
+
+/* Help menu customisations */
+#header ul#btn-help-submenu {
+    width: 300px !important;
+}
+#header ul#btn-help-submenu li a span.menu-label {
+    font-size: 16px;
+    display: inline-block;
+    text-indent: 0px;
+}
+#header ul#btn-help-submenu li a {
+    padding: 10px 30px;
+    color: #fff;
+}
+#header ul#btn-help-submenu li a > i.fa {
+    display: none !important;
 }
 
 /* Deploy menu customisations */

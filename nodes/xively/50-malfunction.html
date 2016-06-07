@@ -1,0 +1,130 @@
+<!--
+  Copyright 2016 LogMeIn Inc
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="xively-malfunction">
+    <div id="channel-config" style="display:none;">
+        <div class="form-row">
+            <label for="node-input-device_template"><i class="fa fa-hdd-o"></i> <span data-i18n="xively.label.device-type"></span></label>
+            <select type="text" id="node-input-device_template" style="display: inline-block; vertical-align: middle; width:60%;">
+            </select>
+        </div>
+    </div>
+    <div id="channel-config-loader" style="margin: 30px auto;text-align:center;">
+        <img src="red/images/spin.svg" style="height: 30px; margin-right: 10px; " class="login-spinner"/>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name this node (optional)">
+    </div>
+    <div class="form-row" style="display:none;">
+        <input type="hidden" id="node-input-xively_creds">
+        <input type="hidden" id="node-input-default_name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="xively-malfunction">
+   <p>Listen for malfunctions on Xively device type.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('xively-malfunction',{
+        category: 'xively',    
+        color:"#E33E2C",
+        defaults: {            
+            xively_creds: {type:"xively-user-credentials",required:true},
+            name: {value:""},   
+            default_name: {value:""},
+            device_template: {value:"", required:true}
+        },
+        inputs:0,             
+        outputs:1,              
+        icon: "xi.png",    
+        label: function() {    
+            return this.name||this.default_name||"Malfunction";
+        },
+        labelStyle: function() { 
+            return "";
+        },
+        paletteLabel: function() {
+          return "Malfunction";
+        },
+        oneditprepare: function(){
+            var xivelyCredsInput = $("#node-input-xively_creds");
+            var channelConfigDiv = $("#channel-config");
+            var channelConfigLoaderDiv = $("#channel-config-loader");
+            var deviceTemplateInput = $("#node-input-device_template");
+
+            var selectDeviceTypeMsg = this._("xively.label.select-device-type");
+
+            var xively_creds = this.xively_creds;
+
+            var device_template = this.device_template;
+
+            function setupDeviceTemplates(){
+                $.getJSON('xively/deviceTemplates/'+xively_creds,function(templates) {
+                    deviceTemplateInput.off("change", onDeviceTemplateInputChange);
+                    deviceTemplateInput.empty();
+                    deviceTemplateInput.append(new Option(selectDeviceTypeMsg, ""));
+                    $.each(templates, function(i, template){
+                        deviceTemplateInput.append(new Option(
+                            template.name, 
+                            template.id));
+                    });
+   
+                    deviceTemplateInput.prop('disabled', false);
+                    if(device_template !== "" && 
+                        deviceTemplateInput.find("option[value='" + device_template + "']").length !== 0){
+                        deviceTemplateInput.val(device_template);
+                        deviceTemplateInput.removeClass("input-error");
+                    }
+
+                    deviceTemplateInput.on("change", onDeviceTemplateInputChange);
+                    channelConfigLoaderDiv.hide();
+                    channelConfigDiv.show();
+                });
+            }
+
+            function onXivelyCredsInputChange(e){
+                var currentVal = xivelyCredsInput.val();
+                if(currentVal == "" || currentVal == "_ADD_"){
+                    deviceTemplateInput.prop('disabled', 'disabled');
+                }else{
+                    xively_creds = currentVal;
+                    setupDeviceTemplates();
+                }
+            }
+
+            function onDeviceTemplateInputChange(e){
+                var currentVal = deviceTemplateInput.val();
+            }
+
+            if (!xively_creds || xively_creds === "") {
+                deviceTemplateInput.prop('disabled', 'disabled');
+            }else{
+                setupDeviceTemplates();
+            }
+
+            xivelyCredsInput.on("change", onXivelyCredsInputChange);
+            deviceTemplateInput.on("change", onDeviceTemplateInputChange);
+        },
+        oneditsave: function(){
+            var defaultName = $.trim($("#node-input-device_template option:selected" ).text() +" - Malfunction");
+            if(defaultName !== " - Malfunction"){
+                $("#node-input-default_name").val(defaultName);
+            }
+        }
+    });
+</script>

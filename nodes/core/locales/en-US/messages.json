@@ -693,5 +693,134 @@
             "appendfail": "failed to append to file: __error__",
             "createfail": "failed to create file: __error__"
         }
+    },
+    "xively": {
+        "label": {
+            "xively":"Xively",
+            "name": "Name",
+            "device-type": "Device Type",
+            "select-device-type":"Select a device type...",
+            "channel-type": "Channel",
+            "select-channel-type": "Select a channel type...",
+            "org-filter": "Organization",
+            "select-org-filter": "Filter by organization...",
+            "remove-org-filter": "Remove org filter...",
+            "sub-org-filter": "Sub Org",
+            "select-sub-org-filter": "Choose sub org...",
+            "account-id": "Account Id",
+            "access-token": "Access Token",
+            "register": "Register to get your credentials at",
+            "xively-user-creds": "Xively Creds",
+            "payload-format":"Payload",
+            "to":"To",
+            "field-type": "Set",
+            "set_to": "To",
+            "select-custom-field-type": "Select a custom field...",
+            "set_address_hardcoded":"Address set below",
+            "set_address_by_property": "Address from property",
+            "set_number_hardcoded":"Number set below",
+            "set_number_by_property": "Number from property",
+            "number":"Number",
+            "matchall": "match all rules",
+            "matchany": "match any rule",
+            "property":"Property",
+            "email":"Email",
+            "subject":"Subject",
+            "include_device_data":"Include Device Information",
+            "property":"Property",
+            "repeat":"Repeat",
+            "every":"every",
+            "minutes":"minutes",
+            "seconds":"seconds",
+            "hours":"hours",
+            "days":"days",
+
+            "raw":"Raw",
+            "json":"JSON"
+        },
+        "creds":{
+            "label":{
+                "name": "Label",
+                "accountId": "Account Id",
+                "username": "Username",
+                "password": "Password",
+                "mqtt-secret":"Mqtt Secret"
+            }
+        },
+        "status": {
+            "failed":"failed"
+        },
+        "errors": {
+        }
+    },
+    "weather": {
+        "label": {
+            "name": "Name",
+            "forecast": "Forecast",
+            "tomorrow": "Tomorrow",
+            "currently": "Currently",
+            "datetime": "Specific date and time",
+            "input": "Input defined",
+            "date": "Date",
+            "time": "Time (UTC)",
+            "latitude": "Latitude",
+            "longitude": "Longitude",
+            "register": "Register to get your key at",
+            "copy": "Copy the key here and give it a name",
+            "key": "Key",
+            "units": "Units",
+            "rule":"Rule"
+        },
+        "and": "and",
+        "matchall": "match all rules",
+        "matchany": "match any rule",
+        "ignorecase": "ignore case",
+        "placeholder": {
+            "name": "Name",
+            "latitude": "Latitude",
+            "longitude": "Longitude"
+        },
+        "matchall": "match all rules",
+        "matchany": "match any rule",
+        "rules": {
+            "btwn":"is between",
+            "cont":"contains",
+            "regex":"matches regex",
+            "true":"is true",
+            "false":"is false",
+            "null":"is null",
+            "nnull":"is not null",
+            "else":"otherwise"
+        },
+        "placeholder": {
+            "name": "Name",
+            "latitude": "Latitude",
+            "longitude": "Longitude"
+        },
+        "warn": {
+            "more-than-60-years": "Date more than 60 years in the past. Results may be unreliable",
+            "more-than-10-years": "Date more than 10 years in the future. Results may be unreliable"
+        },
+        "error": {
+            "settings-invalid-lat_lon": "Invalid lat/lon in node settings",
+            "msg-invalid-lat_lon": "Invalid lat/lon in msg.location",
+            "no-credentials": "missing forecast.io credentials",
+            "invalid-lat_lon": "Invalid lat/lon provided",
+            "invalid-time": "Invalid time provided",
+            "invalid-date": "Invalid date provided",
+            "incorrect-apikey": "Incorrect API key provided",
+            "invalid-url": "invalid url"
+        },
+        "message": {
+            "weather-forecast": "Weather Forecast Information",
+            "weather-info": "Weather forecast information for: __time__ at coordinates: __lat__, __lon__"
+        },
+        "units": {
+            "us": "us - imperial us units",
+            "si": "si - SI metric units",
+            "ca": "ca - SI units, wind in km/h",
+            "uk": "uk - SI units, wind in mph, distances in miles",
+            "auto": "auto - automatic, based on location"
+        }
     }
 }

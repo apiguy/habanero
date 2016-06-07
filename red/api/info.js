@@ -41,6 +41,10 @@ module.exports = {
             safeSettings.paletteExcludeNodeTypes = settings.paletteExcludeNodeTypes;
         }
 
+        if (util.isArray(settings.helpTopics)) {
+            safeSettings.helpTopics = settings.helpTopics || [];
+        }
+
         res.json(safeSettings);
     }
 }

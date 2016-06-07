@@ -1,0 +1,56 @@
+[
+    {
+        "type": "tab",
+        "id": "cdac0bb5.7b18e8",
+        "label": "Flow 1"
+    },
+    {
+        "id": "702a0f4d.21805",
+        "type": "xively-user-credentials",
+        "z": "",
+        "creds_name": "OrchestratorUser"
+    },
+    {
+        "id": "958f979a.383e08",
+        "type": "twitter in",
+        "z": "cdac0bb5.7b18e8",
+        "twitter": "",
+        "tags": "federer",
+        "user": "false",
+        "name": "",
+        "topic": "tweets",
+        "x": 68.5,
+        "y": 102,
+        "wires": [
+            [
+                "a74508d2.c79ee8"
+            ]
+        ]
+    },
+    {
+        "id": "a74508d2.c79ee8",
+        "type": "debug",
+        "z": "cdac0bb5.7b18e8",
+        "name": "Sample Debug",
+        "active": true,
+        "console": "false",
+        "complete": "false",
+        "x": 326.5,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "ab89ed89.75d4",
+        "type": "xively in",
+        "z": "cdac0bb5.7b18e8",
+        "xively_creds": "702a0f4d.21805",
+        "name": "Xively In",
+        "device_template":"",
+        "device_channel":"",
+        "x": 132.5,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    }
+]

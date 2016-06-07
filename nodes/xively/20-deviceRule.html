@@ -1,0 +1,453 @@
+<!--
+  Copyright 2014 LogMeIn Inc
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="xively-device-rule">
+    <div id="device-config" style="display:none;">
+        <div class="form-row">
+            <label for="node-input-device_template"><i class="fa fa-hdd-o"></i> <span data-i18n="xively.label.device-type"></span></label>
+            <select type="text" id="node-input-device_template" style="display: inline-block; vertical-align: middle; width:60%;">
+            </select>
+        </div>
+    </div>
+    <div id="device-config-loader" style="margin: 30px auto;text-align:center;">
+        <img src="red/images/spin.svg" style="height: 30px; margin-right: 10px; " class="login-spinner"/>
+    </div>
+    <div class="form-row node-input-rule-container-row" style="margin-bottom: 0px;">
+        <div id="node-input-rule-container-div" style="box-sizing: border-box; border-radius: 5px; height: 350px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
+            <ol id="node-input-rule-container" style=" list-style-type:none; margin: 0;"></ol>
+        </div>
+    </div>
+    <div class="form-row">
+        <a href="#" class="editor-button editor-button-small" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="switch.label.rule"></span></a>
+    </div>
+    <div class="form-row">
+        <select id="node-input-matchall" style="min-width: 600px; margin-right:5px;">
+            <option value="true" data-i18n="xively.label.matchall"></option>
+            <option value="false" data-i18n="xively.label.matchany"></option>
+        </select>
+    </div>
+    <div class="form-row repeat-time-row" id="repeat-time-row-interval">
+        <label for=""><i class="fa fa-repeat"></i> <span data-i18n="xively.label.repeat"></span></label>
+        <span data-i18n="xively.label.every"></span>
+        <input id="node-input-repeat_count" class="repeat-time-count" style="width:50px;"></input>
+        <select style="width: 100px" id="node-input-repeat_units">
+            <option value="s" data-i18n="xively.label.seconds"></option>
+            <option value="m" data-i18n="xively.label.minutes"></option>
+            <option value="h" data-i18n="xively.label.hours"></option>
+            <option value="d" data-i18n="xively.label.days"></option>
+        </select><br/>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name this node (optional)">
+    </div>
+    <div class="form-row" style="display:none;">
+        <input type="hidden" id="node-input-xively_creds">
+        <input type="hidden" id="node-input-org_ancestry">
+        <input type="hidden" id="node-input-default_name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="xively-device-rule">
+   <p>Xively rule based on a device template.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('xively-device-rule',{
+        category: 'xively',    
+        color:"#E33E2C",
+        defaults: {            
+            xively_creds: {type:"xively-user-credentials",required:true},
+            name: {value:""},   
+            default_name: {value:""},
+            repeat_count: {value:"5"},
+            repeat_units: {value: "m"},
+            device_template: {value:"", required:true},
+            rules: {value:[]},
+            matchall:{value:"true", required:true}
+        },
+        inputs:0,             
+        outputs:1,              
+        icon: "xi.png",    
+        label: function() {    
+            return this.name||this.default_name||"Device Rule";
+        },
+        labelStyle: function() { 
+            return "";
+        },
+        paletteLabel: function() {
+          return "Device Rule";
+        },
+        oneditprepare: function(){
+            // WOW this function is HUGE, can we find a way to clean this up?
+            var xivelyCredsInput = $("#node-input-xively_creds");
+            var channelConfigDiv = $("#device-config");
+            var channelConfigLoaderDiv = $("#device-config-loader");
+            var deviceTemplateInput = $("#node-input-device_template");
+            var rulesContainer = $("#node-input-rule-container");
+            var channelTemplates = {};
+
+            var selectDeviceTypeMsg = this._("xively.label.select-device-type");
+            var andLabel = this._("switch.and");
+            var caseLabel = this._("switch.ignorecase");
+
+            var node = this;
+            var xively_creds = node.xively_creds;
+            var device_template = node.device_template;
+            var device_channel = node.device_channel;
+
+            var channelOptions = [];
+
+            var operators = [
+                {v:"eq",t:"==", title:"equal to"},
+                {v:"neq",t:"!=", title:"not equal to"},
+                {v:"lt",t:"<", title:"less than"},
+                {v:"lte",t:"<=", title:"less than or equal"},
+                {v:"gt",t:">", title:"greater than"},
+                {v:"gte",t:">=", title:"greater than or equal"},
+                {v:"btwn",t:this._("switch.rules.btwn"), title: this._("switch.rules.btwn")},
+                {v:"cont",t:this._("switch.rules.cont"), title: this._("switch.rules.cont")},
+                {v:"regex",t:this._("switch.rules.regex"), title: this._("switch.rules.regex")},
+                {v:"true",t:this._("switch.rules.true"), title: this._("switch.rules.true")},
+                {v:"false",t:this._("switch.rules.false"), title: this._("switch.rules.false")},
+                {v:"null",t:this._("switch.rules.null"), title: this._("switch.rules.null")},
+                {v:"nnull",t:this._("switch.rules.nnull"), title: this._("switch.rules.nnull")}
+            ];
+
+            function setupDeviceTemplates(){
+                $.getJSON('xively/deviceTemplates/'+xively_creds,function(templates) {
+                    deviceTemplateInput.off("change", onDeviceTemplateInputChange);
+                    deviceTemplateInput.empty();
+                    deviceTemplateInput.append(new Option(selectDeviceTypeMsg, ""));
+                    $.each(templates, function(i, template){
+                        deviceTemplateInput.append(new Option(
+                            template.name, 
+                            template.id));
+                        channelTemplates[template.id] = template.channelTemplates;
+                    });
+   
+                    deviceTemplateInput.prop('disabled', false);
+                    if(device_template !== "" && 
+                        deviceTemplateInput.find("option[value='" + device_template + "']").length !== 0){
+                        deviceTemplateInput.val(device_template);
+                        deviceTemplateInput.removeClass("input-error");
+                        setupChannelTemplates(device_template);
+                    }
+
+                    deviceTemplateInput.on("change", onDeviceTemplateInputChange);
+                    channelConfigLoaderDiv.hide();
+                    channelConfigDiv.show();
+                });
+            }
+
+            function setupChannelTemplates(deviceTemplateId){
+                var templates = channelTemplates[deviceTemplateId];
+                channelOptions = []
+                $.each(templates, function(i, template){
+                    channelOptions.push({label:template.name, value:template.id, disabled: template.persistenceType != "timeSeries"});
+                });
+                if(rulesContainer.children().length > 0){
+                    //clear out and redraw
+                    node._def.formToRules(node, rulesContainer);
+                    rulesContainer.empty();
+                    for (var i=0;i<node.rules.length;i++) {
+                        var rule = node.rules[i];
+                        generateRule(i+1,rule);
+                    }
+                }else{
+                    //setup first rule
+                    generateRule(rulesContainer.children().length+1,{t:"",v:"",v2:""});
+                }
+            }
+
+            function onXivelyCredsInputChange(e){
+                var currentVal = xivelyCredsInput.val();
+                if(currentVal == "" || currentVal == "_ADD_"){
+                    console.log("UH Oh")
+                    deviceTemplateInput.prop('disabled', 'disabled');
+                }else{
+                    console.log("got here")
+                    xively_creds = currentVal;
+                    setupDeviceTemplates();
+                }
+            }
+
+            function onDeviceTemplateInputChange(e){
+                var currentVal = deviceTemplateInput.val();
+                if(currentVal == "" || currentVal == null){
+                    // pass
+                }else{
+                    setupChannelTemplates(currentVal);
+                }
+            }
+
+            this.resizeRule = function(rule,newWidth) {
+                var selectField = rule.find("select");
+                var type = selectField.children("option:selected").val();
+                var valueField = rule.find(".node-input-rule-value");
+                var btwnField1 = rule.find(".node-input-rule-btwn-value");
+                var btwnField2 = rule.find(".node-input-rule-btwn-value2");
+                var selectWidth;
+                if (type.length < 4) {
+                    selectWidth = 60;
+                } else if (type === "regex") {
+                    selectWidth = 147;
+                } else {
+                    selectWidth = 120;
+                }
+                selectField.width(selectWidth);
+
+                if (type === "btwn") {
+                    var labelWidth = rule.find(".node-input-rule-btwn-label").width();
+                    btwnField1.typedInput("width",(newWidth-selectWidth-320));
+                    btwnField2.typedInput("width",(newWidth-selectWidth-320));
+                } else {
+                    if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
+                        // valueField.hide();
+                    } else {
+                        valueField.typedInput("width",(newWidth-selectWidth-320));
+                    }
+                }
+            }
+
+            function getTemplateChannels(){
+                return channelOptions;
+            }
+
+
+
+            function generateRule(i,rule) {
+                var container = $('<li/>');
+                var topRow = $('<div/>').appendTo(container);
+                var bottomRow = $('<div/>', {style:"padding-top: 5px; padding-left: 58px;"}).appendTo(container);
+                var row2 = $('<div/>',{style:"padding-top: 5px; padding-left: 175px;"}).appendTo(container);
+                var row3 = $('<div/>',{style:"padding-top: 5px; padding-left: 160px;"}).appendTo(container);
+
+                $('<i style="color: #eee; cursor: move;" class="node-input-rule-handle fa fa-bars"></i>').appendTo(topRow);
+
+                $('<span class="node-input-rule-index" style="padding-left:8px">'+i+'.</span>').appendTo(topRow);
+                $('<label/>', {style:"margin-left: 15px;width:inherit;"}).text("If").appendTo(topRow);
+
+                var inputFieldTypes = [
+                    {value:"channel",label:"channel.",options: getTemplateChannels(), hasSubvalue:true},
+                    'msg',
+                    'flow',
+                    'global'];
+
+                var inputField = $('<input/>',{class:"node-input-rule-input-value",type:"text",style:"margin-left: 10px; width: 170px;"}).appendTo(topRow).typedInput({default:rule.it||'channel',types:inputFieldTypes});
+
+                var selectField = $('<select/>',{style:"width:120px; margin-left: 5px; text-align: center;"}).appendTo(bottomRow);
+                for (var d in operators) {
+                    selectField.append($("<option></option>").val(operators[d].v).text(operators[d].t).prop('title', operators[d].title));
+                }
+
+                var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px; width: 145px;"}).appendTo(bottomRow).typedInput({default:'num',types:['msg','flow','global','str','num']});
+                var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(bottomRow).typedInput({default:'num',types:['msg','flow','global','str','num']});
+                var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
+                var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num']});
+
+
+
+                var finalspan = $('<span/>',{style:"float: right;margin-right: 10px;"}).appendTo(topRow);
+
+                var deleteButton = $('<a/>',{href:"#",class:"editor-button editor-button-small", style:"margin-top: 7px; margin-left: 5px;"}).appendTo(finalspan);
+                $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
+
+                var caseSensitive = $('<input/>',{id:"node-input-rule-case-"+i,class:"node-input-rule-case",type:"checkbox",style:"width:auto;vertical-align:top"}).appendTo(row2);
+                $('<label/>',{for:"node-input-rule-case-"+i,style:"margin-left: 3px;"}).text(caseLabel).appendTo(row2);
+                selectField.change(function() {
+                    var width = $("#node-input-rule-container").width();
+                    var type = selectField.children("option:selected").val();
+                    node.resizeRule(container,width);
+                    if (type === "btwn") {
+                        valueField.parent().hide();
+                        btwnValueField.parent().show();
+                    } else {
+                        btwnValueField.parent().hide();
+                        if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
+                            valueField.parent().hide();
+                        } else {
+                            valueField.parent().show();
+                        }
+                    }
+                    if (type === "regex") {
+                        row2.show();
+                        row3.hide();
+                    } else if (type === "btwn"){
+                        row2.hide();
+                        row3.show();
+                    } else {
+                        row2.hide();
+                        row3.hide();
+                    }
+                });
+
+                deleteButton.click(function() {
+                    container.css({"background":"#fee"});
+                    container.fadeOut(300, function() {
+                        $(this).remove();
+                        $("#node-input-rule-container").children().each(function(i) {
+                            $(this).find(".node-input-rule-index").html(i+1);
+                        });
+
+                    });
+                });
+                container.attr('style', "background: #fff; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;");
+                rulesContainer.append(container);
+
+                selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
+                if (rule.t == "btwn") {
+                    btwnValueField.typedInput('value',rule.v);
+                    btwnValueField.typedInput('type',rule.vt||'num');
+                    btwnValue2Field.typedInput('value',rule.v2);
+                    btwnValue2Field.typedInput('type',rule.v2t||'num');
+                } else if (typeof rule.v != "undefined") {
+                    valueField.typedInput('value',rule.v);
+                    valueField.typedInput('type',rule.vt||'num');
+                }
+                
+                console.log(rule.iv);
+
+                inputField.typedInput('value',rule.iv);
+                inputField.typedInput('type',rule.it||"channel");
+                    
+                
+                
+                inputField.typedInput('subvalue',rule.sv||"value");
+
+                if (rule.case) {
+                    caseSensitive.prop('checked',true);
+                } else {
+                    caseSensitive.prop('checked',false);
+                }
+                selectField.change();
+            }
+
+            if (!xively_creds || xively_creds === "") {
+                console.log("we got nuthin")
+                deviceTemplateInput.prop('disabled', 'disabled');
+            }else{
+                console.log("should work")
+                setupDeviceTemplates();
+            }
+
+
+            $("#node-input-add-rule").click(function() {
+                generateRule(rulesContainer.children().length+1,{t:"",v:"",v2:""});
+                $("#node-input-rule-container-div").scrollTop($("#node-input-rule-container-div").get(0).scrollHeight);
+            });
+
+            for (var i=0;i<this.rules.length;i++) {
+                var rule = this.rules[i];
+                generateRule(i+1,rule);
+            }
+
+            $(".repeat-time-count").spinner({
+                //max:60,
+                min:1
+            });
+
+            $( "#node-input-rule-container" ).sortable({
+                axis: "y",
+                update: function( event, ui ) {
+                    var rules = $("#node-input-rule-container").children();
+                    rules.each(function(i) {
+                        $(this).find(".node-input-rule-index").html(i+1);
+                    });
+                },
+                handle:".node-input-rule-handle",
+                cursor: "move"
+            });
+            $( "#node-input-rule-container .node-input-rule-handle" ).disableSelection();
+
+            xivelyCredsInput.on("change", onXivelyCredsInputChange);
+            deviceTemplateInput.on("change", onDeviceTemplateInputChange);
+
+        },
+
+        formToRules: function(node, rulesContainer, validate){
+            var rules = rulesContainer.children();
+            var ruleset;
+            node.rules= [];
+            rules.each(function(i) {
+                var rule = $(this);
+                var type = rule.find("select option:selected").val();
+                var r = {t:type};
+                if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else")) {
+                    r.sv = rule.find(".node-input-rule-input-value").typedInput('subvalue');
+                    r.iv = rule.find(".node-input-rule-input-value").typedInput('value');
+                    r.ivn = rule.find(".red-ui-typedInput-option-trigger").text();
+                    r.it = rule.find(".node-input-rule-input-value").typedInput('type');
+
+                    if(validate && i == 0){
+                        //first rule must be a channel input
+                        if(r.it !== "channel"){
+                            alert("First rule must be a channel input");
+                            throw "Rule Error";
+                        }
+                    }
+
+                    if (type === "btwn") {
+                        r.v = rule.find(".node-input-rule-btwn-value").typedInput('value');
+                        r.vt = rule.find(".node-input-rule-btwn-value").typedInput('type');
+                        r.v2 = rule.find(".node-input-rule-btwn-value2").typedInput('value');
+                        r.v2t = rule.find(".node-input-rule-btwn-value2").typedInput('type');
+                    } else {
+                        r.v = rule.find(".node-input-rule-value").typedInput('value');
+                        r.vt = rule.find(".node-input-rule-value").typedInput('type');
+                    }
+                    if (type === "regex") {
+                        r.case = rule.find(".node-input-rule-case").prop("checked");
+                    }
+                }else{
+                    r.sv = rule.find(".node-input-rule-input-value").typedInput('subvalue');
+                    r.iv = rule.find(".node-input-rule-input-value").typedInput('value');
+                    r.ivn = rule.find(".red-ui-typedInput-option-trigger").text();
+                    r.it = rule.find(".node-input-rule-input-value").typedInput('type');
+                }
+                node.rules.push(r);
+            });
+        },
+
+        oneditsave: function(){
+            var defaultNameSuffix = " - Rule";
+            var defaultName = $.trim($("#node-input-device_template option:selected" ).text()+defaultNameSuffix);
+            if(defaultName !== "" && defaultName !== defaultNameSuffix){
+                $("#node-input-default_name").val(defaultName);
+            }
+
+            this._def.formToRules(this, $("#node-input-rule-container"), true);
+        },
+
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
+            var height = size.height;
+            for (var i=0;i<rows.size();i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-input-rule-container-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            $("#node-input-rule-container-div").css("height",height+"px");
+
+            var rules = $("#node-input-rule-container").children();
+            var newWidth = $("#node-input-rule-container").width();
+            var node = this;
+            rules.each(function(i) {
+                node.resizeRule($(this),newWidth);
+            })
+        }
+    });
+</script>

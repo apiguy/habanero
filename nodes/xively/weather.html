@@ -1,0 +1,539 @@
+<!--
+  Copyright 2016 LogMeIn Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+<script type="text/x-red" data-template-name="xi-weather-query">
+    <div class="form-row">
+        <label for="weather-forecast-time-select"><i class="fa fa-globe"></i> <span data-i18n="weather.label.forecast"></span></label>
+        <select id="weather-forecast-time-select">
+            <option value="currently" data-i18n="weather.label.currently"></option>
+            <option value="tomorrow" data-i18n="weather.label.tomorrow"></option>
+            <option value="specific" data-i18n="weather.label.datetime"></option>
+            <option value="message" data-i18n="weather.label.input"></option>
+        </select>
+    </div>
+    <div class="form-row weather-forecast-time" id="weather-forecast-time-specific">
+        <label for="node-input-date"><i class="fa fa-calendar"></i> <span data-i18n="weather.label.date"></span></label>
+        <input id="node-input-date" class="weather-time-input" type="date" style="width:140px">
+        <span style="float:right;"><i class="fa fa-clock-o"></i> <span data-i18n="weather.label.time"></span>
+        <input id="node-input-time" class="weather-time-input" type="time" style="width:70px"></span>
+    </div>
+    <div class="form-row" id="weather-coordinates">
+        <label for=""><i class="fa fa-location-arrow"></i> <span data-i18n="weather.label.latitude"></span></label>
+        <input type="text" class="weather-location-input" id="node-input-lat" style="width: 180px; margin-bottom: 7px" data-i18n="[placeholder]weather.placeholder.latitude">
+        </br>
+        <label for=""><i class="fa fa-location-arrow"></i> <span data-i18n="weather.label.longitude"></span></label>
+        <input type="text" class="weather-location-input" id="node-input-lon" style="width: 180px" data-i18n="[placeholder]weather.placeholder.longitude">
+    </div>
+    <div class="form-row">
+        <label for="node-input-units"><i class="fa fa-cog"></i> <span data-i18n="weather.label.units"></span></label>
+        <select id="node-input-units" style="width:70%">
+            <option value="us" data-i18n="weather.units.us"></option></option>
+            <option value="si" data-i18n="weather.units.si"></option></option>
+            <option value="ca" data-i18n="weather.units.ca"></option></option>
+            <option value="uk2" data-i18n="weather.units.uk"></option></option>
+            <option value="auto" data-i18n="weather.units.auto"></option></option>
+        </select>
+    </div>
+    <div class="form-row" id="weather-name">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="weather.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]weather.placeholder.name">
+    </div>
+    <div class="form-row" style="display:none;">
+        <input type="hidden" id="node-input-xively_creds">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('xi-weather-query',{
+        category: 'weather',
+        color: '#7AA0D2',
+        defaults: {
+            name: {value:""},
+            xively_creds: {type:"xively-user-credentials",required:true},
+            lon: {value:"", validate:function(v) {return ((v>=-180) && (v<=180));} },
+            lat: {value:"", validate:function(v) {return ((v>=-90) && (v<=90));} },
+            date: {value:""},
+            time: {value:""},
+            mode: {value:"node"},
+            units: {value:"us"}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "weather.png",
+        label: function() {
+            return this.name||"Weather Info";
+        },
+        paletteLabel: function() {
+          return "Weather Info";
+        },
+        oneditprepare: function() {
+            $("#weather-forecast-time-select").change(function() {
+                var id = $("#weather-forecast-time-select option:selected").val();
+                $(".weather-forecast-time").hide();
+                $("#weather-forecast-time-"+id).show();
+                console.log(id);
+            });
+            if(this.date !== ""||this.time !== ""){
+                $("#weather-forecast-time-select").val("specific");
+            } else if (this.mode === "currently"){
+                $("#weather-forecast-time-select").val("currently");
+            } else if (this.mode === "node"){
+                $("#weather-forecast-time-select").val("tomorrow");
+            } else {
+                $("#weather-forecast-time-select").val("message");
+            }
+            var id = $("#weather-forecast-time-select option:selected").val();
+            $(".weather-forecast-time").hide();
+            $("#weather-forecast-time-"+id).show();
+        },
+        oneditsave: function() {
+            var type = $("#weather-forecast-time-select option:selected").val();
+            if (type == "tomorrow" || type == "message") {
+                $("#node-input-date").val("");
+                $("#node-input-time").val("");
+            }
+            if(type === "message"){
+                this.mode = "message";
+            } else if(type === "currently" ){
+                this.mode = "currently";
+            }else {
+                this.mode = "node";
+            }
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-help-name="xi-weather-query">
+    <p>A node which gets weather forecast data when an input is received.</p>
+    <p>
+        This is done using a latitude and longitude set of coordinates and an optional date/time combination.
+    </p>
+    <p>These can be passed in as settings on the node, or as:</p>
+    <ul>
+       <li> 
+            <code>msg.location.lat</code>, <code>msg.location.lon</code> and optionally <code>msg.time</code>
+        </li>
+    </ul>
+    <p>if using <code>msg.time</code> it can either be a javascript Date object or a
+    string or number of milliseconds since 1970 (epoch time in mS).
+    If neither is specified the forecast defaults to tomorrow.</p>
+    <p>The user also has the option of providing a date instead of returning data for the next day.</p>
+    <p>The node will always prioritise the node settings if they are present.</p>
+    <p>The node sets the following properties of <code>msg.weather</code>:</p>
+    <ul>
+        <li><code>slug</code> - a single word (string) representation of the current weather forecast.</li>
+        <li><code>summary</code> - a more detailed explanation of what the weather is forecast to be.</li>
+        <li><code>humidity</code> - a current humidity forecast in decimal (0-1).</li>
+        <li><code>maxtemp</code> - the current forecast max temperature for the location in Fahrenheit.</li>
+        <li><code>mintemp</code> - the current forecast minimum temperature for the location in Fahrenheit.</li>
+        <li><code>windspeed</code> - the current forecast windspeed at the location in metres per second</li>
+        <li><code>winddirection</code> - the current forecast wind direction for the location in degrees.</li>
+        <li><code>lon</code> - the longitude of the location from which the forecast was sourced.</li>
+        <li><code>lat</code> - the latitude of the location from which the forecast was sourced.</li>
+        <li><code>clouds</code> - the current forecast cloud coverage of the location in percent.</li>
+        <li><code>precipitation</code> - the current forecast precipitation chance</li>
+        <li><code>sunrise</code> - the time at which the is forecast to rise in Unix UTC format.</li>
+        <li><code>sunset</code> - the time at which the sun is forecast to set in Unix UTC format.</li>
+        <li><code>units</code> - the units of the results as requested.</li>
+        <li><code>location.lat</code> - the longitude of the location from which the data was sourced.</li>
+        <li><code>location.lon</code> - the latitude of the location from which the data was sourced.</li>
+        <li><code>time</code> - the time at which the weather data was received</li>
+        <li><code>data</code> - the full weather data object (includes fine grained info). </li>
+    </ul>
+</script>
+
+
+<script type="text/x-red" data-template-name="xi-weather-rule">
+    <div class="form-row">
+        <label for="weather-forecast-time-select"><i class="fa fa-globe"></i> <span data-i18n="weather.label.forecast"></span></label>
+        <select id="weather-forecast-time-select">
+            <option value="currently" data-i18n="weather.label.currently"></option>
+            <option value="tomorrow" data-i18n="weather.label.tomorrow"></option>
+            <option value="specific" data-i18n="weather.label.datetime"></option>
+            <option value="message" data-i18n="weather.label.input"></option>
+        </select>
+    </div>
+    <div class="form-row weather-forecast-time" id="weather-forecast-time-specific">
+        <label for="node-input-date"><i class="fa fa-calendar"></i> <span data-i18n="weather.label.date"></span></label>
+        <input id="node-input-date" class="weather-time-input" type="date" style="width:140px">
+        <span style="float:right;"><i class="fa fa-clock-o"></i> <span data-i18n="weather.label.time"></span>
+        <input id="node-input-time" class="weather-time-input" type="time" style="width:70px"></span>
+    </div>
+    <div class="form-row node-input-rule-container-row" style="margin-bottom: 0px;">
+        <div id="node-input-rule-container-div" style="box-sizing: border-box; border-radius: 5px; height: 350px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
+            <ol id="node-input-rule-container" style=" list-style-type:none; margin: 0;"></ol>
+        </div>
+    </div>
+    <div class="form-row">
+        <a href="#" class="editor-button editor-button-small" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="weather.label.rule"></span></a>
+    </div>
+    <div class="form-row">
+        <select id="node-input-matchall" style="min-width: 600px; margin-right:5px;">
+            <option value="true" data-i18n="weather.matchall"></option>
+            <option value="false" data-i18n="weather.matchany"></option>
+        </select>
+    </div>
+
+    <div class="form-row" id="weather-name">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="weather.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]weather.placeholder.name">
+    </div>
+    <div class="form-row" style="display:none;">
+        <input type="hidden" id="node-input-xively_creds">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('xi-weather-rule',{
+        category: 'weather',
+        color: '#7AA0D2',
+        defaults: {
+            name: {value:""},
+            xively_creds: {type:"xively-user-credentials",required:true},
+            date: {value:""},
+            time: {value:""},
+            mode: {value:"currently"},
+            units: {value:"us"},
+            rules: {value:[{iv:"maxtemp", t:"gt",v:"",v2:""}]},
+            matchall:{value:"true", required:true}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "weather.png",
+        label: function() {
+            return this.name||"Weather Rule";
+        },
+        paletteLabel: function() {
+          return "Weather Rule";
+        },
+        oneditprepare: function() {
+            var node = this;
+            var rulesContainer = $("#node-input-rule-container");
+
+            var andLabel = this._("weather.and");
+            var caseLabel = this._("weather.ignorecase");
+
+            var operators = [
+                {v:"eq",t:"==", title:"equal to"},
+                {v:"neq",t:"!=", title:"not equal to"},
+                {v:"lt",t:"<", title:"less than"},
+                {v:"lte",t:"<=", title:"less than or equal"},
+                {v:"gt",t:">", title:"greater than"},
+                {v:"gte",t:">=", title:"greater than or equal"},
+                {v:"btwn",t:this._("weather.rules.btwn"), title: this._("weather.rules.btwn")},
+                {v:"cont",t:this._("weather.rules.cont"), title: this._("weather.rules.cont")},
+                {v:"regex",t:this._("weather.rules.regex"), title: this._("weather.rules.regex")},
+                {v:"true",t:this._("weather.rules.true"), title: this._("weather.rules.true")},
+                {v:"false",t:this._("weather.rules.false"), title: this._("weather.rules.false")},
+                {v:"null",t:this._("weather.rules.null"), title: this._("weather.rules.null")},
+                {v:"nnull",t:this._("weather.rules.nnull"), title: this._("weather.rules.nnull")}
+            ];
+
+            var weatherVars = [
+                {v:"summary", t:"Weather Summary"},
+                {v:"slug", t:"Slug"},
+                {v:"humidity", t:"Humidity"},
+                {v:"maxTemp", t:"Max Temp"},
+                {v:"minTemp", t:"Min Temp"},
+                {v:"windSpeed", t:"Wind Speed"},
+                {v:"windDirection", t:"Wind Direction"},
+                {v:"clouds", t:"Cloud Cover"},
+                {v:"precipProbability", t:"Precipitation"},
+                {v:"sunrise", t:"Sunrise"},
+                {v:"sunset", t:"Sunset"},
+                {v:"ozone", t:"Ozone"}
+            ];
+
+            this.resizeRule = function(rule,newWidth) {
+                var selectField = rule.find(".operator_select");
+                var type = selectField.children("option:selected").val();
+                var valueField = rule.find(".node-input-rule-value");
+                var btwnField1 = rule.find(".node-input-rule-btwn-value");
+                var btwnField2 = rule.find(".node-input-rule-btwn-value2");
+                var selectWidth;
+                if (type.length < 4) {
+                    selectWidth = 60;
+                } else if (type === "regex") {
+                    selectWidth = 147;
+                } else {
+                    selectWidth = 120;
+                }
+                selectField.width(selectWidth);
+
+                if (type === "btwn") {
+                    var labelWidth = rule.find(".node-input-rule-btwn-label").width();
+                    btwnField1.typedInput("width",(newWidth-selectWidth-320));
+                    btwnField2.typedInput("width",(newWidth-selectWidth-320));
+                } else {
+                    if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
+                        // valueField.hide();
+                    } else {
+                        valueField.typedInput("width",(newWidth-selectWidth-320));
+                    }
+                }
+            };
+
+            function generateRule(i,rule) {
+                var container = $('<li/>');
+                var topRow = $('<div/>').appendTo(container);
+                var bottomRow = $('<div/>', {style:"padding-top: 5px; padding-left: 58px;"}).appendTo(container);
+                var row2 = $('<div/>',{style:"padding-top: 5px; padding-left: 175px;"}).appendTo(container);
+                var row3 = $('<div/>',{style:"padding-top: 5px; padding-left: 160px;"}).appendTo(container);
+
+                $('<i style="color: #eee; cursor: move;" class="node-input-rule-handle fa fa-bars"></i>').appendTo(topRow);
+
+                $('<span class="node-input-rule-index" style="padding-left:8px">'+i+'.</span>').appendTo(topRow);
+                $('<label/>', {style:"margin-left: 15px;width:inherit;"}).text("If").appendTo(topRow);
+
+                var inputField = $('<select/>',{class:"node-input-rule-input-value",type:"text",style:"margin-left: 10px; width: 225px;"}).appendTo(topRow);
+                for (var w in weatherVars) {
+                    inputField.append($("<option></option>").val(weatherVars[w].v).text(weatherVars[w].t));
+                }
+
+                var selectField = $('<select/>',{class:"operator_select", style:"width:120px; margin-left: 5px; text-align: center;"}).appendTo(bottomRow);
+                for (var d in operators) {
+                    selectField.append($("<option></option>").val(operators[d].v).text(operators[d].t).prop('title', operators[d].title));
+                }
+
+                var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px; width: 145px;"}).appendTo(bottomRow).typedInput({default:'num',types:['msg','flow','global','str','num']});
+                var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(bottomRow).typedInput({default:'num',types:['msg','flow','global','str','num']});
+                var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
+                var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num']});
+
+
+
+                var finalspan = $('<span/>',{style:"float: right;margin-right: 10px;"}).appendTo(topRow);
+
+                var deleteButton = $('<a/>',{href:"#",class:"editor-button editor-button-small", style:"margin-top: 7px; margin-left: 5px;"}).appendTo(finalspan);
+                $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
+
+                var caseSensitive = $('<input/>',{id:"node-input-rule-case-"+i,class:"node-input-rule-case",type:"checkbox",style:"width:auto;vertical-align:top"}).appendTo(row2);
+                $('<label/>',{for:"node-input-rule-case-"+i,style:"margin-left: 3px;"}).text(caseLabel).appendTo(row2);
+                selectField.change(function() {
+                    var width = $("#node-input-rule-container").width();
+                    var type = selectField.children("option:selected").val();
+                    node.resizeRule(container,width);
+                    if (type === "btwn") {
+                        valueField.parent().hide();
+                        btwnValueField.parent().show();
+                    } else {
+                        btwnValueField.parent().hide();
+                        if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
+                            valueField.parent().hide();
+                        } else {
+                            valueField.parent().show();
+                        }
+                    }
+                    if (type === "regex") {
+                        row2.show();
+                        row3.hide();
+                    } else if (type === "btwn"){
+                        row2.hide();
+                        row3.show();
+                    } else {
+                        row2.hide();
+                        row3.hide();
+                    }
+                });
+
+                deleteButton.click(function() {
+                    container.css({"background":"#fee"});
+                    container.fadeOut(300, function() {
+                        $(this).remove();
+                        $("#node-input-rule-container").children().each(function(i) {
+                            $(this).find(".node-input-rule-index").html(i+1);
+                        });
+
+                    });
+                });
+                container.attr('style', "background: #fff; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;");
+                rulesContainer.append(container);
+
+                selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
+                if (rule.t == "btwn") {
+                    btwnValueField.typedInput('value',rule.v);
+                    btwnValueField.typedInput('type',rule.vt||'num');
+                    btwnValue2Field.typedInput('value',rule.v2);
+                    btwnValue2Field.typedInput('type',rule.v2t||'num');
+                } else if (typeof rule.v != "undefined") {
+                    valueField.typedInput('value',rule.v);
+                    valueField.typedInput('type',rule.vt||'num');
+                }
+                if(rule.iv){
+                    inputField.val(rule.iv);
+                }
+                
+
+                if (rule.case) {
+                    caseSensitive.prop('checked',true);
+                } else {
+                    caseSensitive.prop('checked',false);
+                }
+                selectField.change();
+            }
+
+            $("#node-input-add-rule").click(function() {
+                generateRule(rulesContainer.children().length+1,{t:"",v:"",v2:""});
+                $("#node-input-rule-container-div").scrollTop($("#node-input-rule-container-div").get(0).scrollHeight);
+            });
+
+            for (var i=0;i<this.rules.length;i++) {
+                var rule = this.rules[i];
+                generateRule(i+1,rule);
+            }
+
+            $( "#node-input-rule-container" ).sortable({
+                axis: "y",
+                update: function( event, ui ) {
+                    var rules = $("#node-input-rule-container").children();
+                    rules.each(function(i) {
+                        $(this).find(".node-input-rule-index").html(i+1);
+                    });
+                },
+                handle:".node-input-rule-handle",
+                cursor: "move"
+            });
+            $( "#node-input-rule-container .node-input-rule-handle" ).disableSelection();
+
+            $("#weather-forecast-time-select").change(function() {
+                var id = $("#weather-forecast-time-select option:selected").val();
+                $(".weather-forecast-time").hide();
+                $("#weather-forecast-time-"+id).show();
+            });
+            if(this.date !== ""||this.time !== ""){
+                $("#weather-forecast-time-select").val("specific");
+            } else if (this.mode === "currently"){
+                $("#weather-forecast-time-select").val("currently");
+            } else if (this.mode === "node"){
+                $("#weather-forecast-time-select").val("tomorrow");
+            } else {
+                $("#weather-forecast-time-select").val("message");
+            }
+            var id = $("#weather-forecast-time-select option:selected").val();
+            $(".weather-forecast-time").hide();
+            $("#weather-forecast-time-"+id).show();
+        },
+
+        formToRules: function(node, rulesContainer, validate){
+            var rules = rulesContainer.children();
+            var ruleset;
+            node.rules= [];
+            rules.each(function(i) {
+                var rule = $(this);
+                var type = rule.find(".operator_select").val();
+                var r = {t:type};
+                if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else")) {
+                    r.iv = rule.find(".node-input-rule-input-value").val();
+                    r.it = "weather";
+
+                    if (type === "btwn") {
+                        r.v = rule.find(".node-input-rule-btwn-value").typedInput('value');
+                        r.vt = rule.find(".node-input-rule-btwn-value").typedInput('type');
+                        r.v2 = rule.find(".node-input-rule-btwn-value2").typedInput('value');
+                        r.v2t = rule.find(".node-input-rule-btwn-value2").typedInput('type');
+                    } else {
+                        r.v = rule.find(".node-input-rule-value").typedInput('value');
+                        r.vt = rule.find(".node-input-rule-value").typedInput('type');
+                    }
+                    if (type === "regex") {
+                        r.case = rule.find(".node-input-rule-case").prop("checked");
+                    }
+                }
+                node.rules.push(r);
+            });
+        },
+        oneditsave: function() {
+            var type = $("#weather-forecast-time-select option:selected").val();
+            if (type == "tomorrow" || type == "message") {
+                $("#node-input-date").val("");
+                $("#node-input-time").val("");
+            }
+            if(type === "message"){
+                this.mode = "message";
+            } else if(type === "currently" ){
+                this.mode = "currently";
+            }else {
+                this.mode = "node";
+            }
+
+            this._def.formToRules(this, $("#node-input-rule-container"), true);
+        },
+
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
+            var height = size.height;
+            for (var i=0;i<rows.size();i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-input-rule-container-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            $("#node-input-rule-container-div").css("height",height+"px");
+
+            var rules = $("#node-input-rule-container").children();
+            var newWidth = $("#node-input-rule-container").width();
+            var node = this;
+            rules.each(function(i) {
+                node.resizeRule($(this),newWidth);
+            })
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-help-name="xi-weather-rule">
+    <p>A node which evaluates weather conditions and forward message if met.</p>
+    <p>
+        This is done using a latitude and longitude set of coordinates and an optional date/time combination.
+    </p>
+    <p>These can be passed in as settings on the node, or as:</p>
+    <ul>
+       <li> 
+            <code>msg.location.lat</code>, <code>msg.location.lon</code> and optionally <code>msg.time</code>
+        </li>
+    </ul>
+    <p>if using <code>msg.time</code> it can either be a javascript Date object or a
+    string or number of milliseconds since 1970 (epoch time in mS).
+    If neither is specified the forecast defaults to tomorrow.</p>
+    <p>The user also has the option of providing a date instead of returning data for the next day.</p>
+    <p>The node will always prioritise the node settings if they are present.</p>
+    <p>The node sets the following properties of <code>msg.weather</code>:</p>
+    <ul>
+        <li><code>slug</code> - a single word (string) representation of the current weather forecast.</li>
+        <li><code>summary</code> - a more detailed explanation of what the weather is forecast to be.</li>
+        <li><code>humidity</code> - a current humidity forecast in decimal (0-1).</li>
+        <li><code>maxtemp</code> - the current forecast max temperature for the location in Fahrenheit.</li>
+        <li><code>mintemp</code> - the current forecast minimum temperature for the location in Fahrenheit.</li>
+        <li><code>windspeed</code> - the current forecast windspeed at the location in metres per second</li>
+        <li><code>winddirection</code> - the current forecast wind direction for the location in degrees.</li>
+        <li><code>lon</code> - the longitude of the location from which the forecast was sourced.</li>
+        <li><code>lat</code> - the latitude of the location from which the forecast was sourced.</li>
+        <li><code>clouds</code> - the current forecast cloud coverage of the location in percent.</li>
+        <li><code>precipitation</code> - the current forecast precipitation chance</li>
+        <li><code>sunrise</code> - the time at which the is forecast to rise in Unix UTC format.</li>
+        <li><code>sunset</code> - the time at which the sun is forecast to set in Unix UTC format.</li>
+        <li><code>units</code> - the units of the results as requested.</li>
+        <li><code>location.lat</code> - the longitude of the location from which the data was sourced.</li>
+        <li><code>location.lon</code> - the latitude of the location from which the data was sourced.</li>
+        <li><code>time</code> - the time at which the weather data was received</li>
+        <li><code>data</code> - the full weather data object (includes fine grained info). </li>
+    </ul>
+</script>

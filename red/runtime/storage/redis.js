@@ -61,6 +61,8 @@ module.exports = {
 
         
     },
+    getValue: getValue,
+    saveValue: saveValue,
     getFlows: function() {
         return getValue("flows", []);
     },

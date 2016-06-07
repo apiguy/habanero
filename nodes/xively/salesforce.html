@@ -1,0 +1,377 @@
+<!--
+  Copyright 2016 LogMeIn Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="salesforce">
+  <div class="form-row" style="display:none;">
+    <label for="node-config-input-logintype"><i class="fa fa-plug"></i> Login Type</label>
+    <select type="text" id="node-config-input-logintype" style="width:70%">
+      <option value="Username-Password">login By Username-Password</option>
+      <option value="oauth">login By OAuth2</option>
+      <option value="Signed-Request">login By Signed-Request</option>
+    </select>
+  </div>
+  </div>
+  <div class="form-row input-loginurl-row">
+    <label for="node-config-input-loginurl"><i class="fa fa-plug"></i> Login URL</label>
+    <select type="text" id="node-config-input-loginurl" style="width:70%">
+      <option value="https://login.salesforce.com">Production(login.salesforce.com)</option>
+      <option value="https://test.salesforce.com">Sandbox(test.salesforce.com)</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-username"><i class="fa fa-bookmark"></i> User Name</label>
+    <input type="text" id="node-config-input-username" placeholder="example@example.com" />
+  </div>
+  <div class="form-row input-password-row">
+    <label for="node-config-input-password"><i class="fa fa-lock"></i> Password</label>
+    <input type="password" id="node-config-input-password">
+  </div>
+  <div class="form-row input-token-row">
+    <label for="node-config-input-token"><i class="fa fa-lock"></i> Token</label>
+    <input type="password" id="node-config-input-token">
+  </div>
+  <div class="form-row input-clientid-row">
+    <label for="node-config-input-clientid"><i class="fa fa-bookmark"></i> Client Id</label>
+    <input type="password" id="node-config-input-clientid" />
+  </div>
+  <div class="form-row input-clientsecret-row">
+    <label for="node-config-input-clientsecret"><i class="fa fa-lock"></i> Client Secret</label>
+    <input type="password" id="node-config-input-clientsecret" />
+  </div>
+  <div class="form-row input-startauth-row">
+    <label>&nbsp;</label>
+    <a class="btn" id="node-config-start-auth" href="#" target="_blank">Authenticate with Force</a>
+  </div>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType('salesforce', {
+    category: 'config',
+    color: "#48ace4",
+    defaults: {
+      username: { value: '', required: true },
+      loginurl: { value: "https://login.salesforce.com" },
+      logintype: { value: "Username-Password" }
+    },
+    credentials: {
+      password: { type: 'password', required: true },
+      token: { type: 'password', required: true },
+      clientid: { type: 'password', required: true },
+      clientsecret: { type: 'password', required: true }
+    },
+    label: function() {
+      return this.username
+    },
+    oneditprepare: function() {
+        var configNode = this;
+        var id = this.id;
+        var pathname = document.location.pathname;
+        if (pathname.slice(-1) != "/") {
+            pathname += "/";
+        }
+        var callback = location.protocol + "//";
+        callback += (location.port == "")? location.hostname : location.hostname + ":" + location.port;
+        callback += pathname + "force-credentials/"+id+"/auth/callback";
+        $("#node-config-force-tooltip").html("<p>Please configure the authorized <b>Redirect URIs</b> of your app to include the following url:</p>\n<code>"+callback+"</code>");
+
+        $("#node-config-start-auth").addClass("disabled");
+
+        function updateForceAuthButton() {
+            var v1 = $("#node-config-input-clientid").val();
+            var v2 = $("#node-config-input-clientsecret").val();
+            if (v1 != "" && v2 != "") {
+                window.forceConfigNodeIntervalId = window.setTimeout(pollForceCredentialsUrl,2000);
+            }
+        }
+        $("#node-config-input-clientid").on('change keydown paste input',updateForceAuthButton);
+        $("#node-config-input-clientsecret").on('change keydown paste input',updateForceAuthButton);
+        updateForceAuthButton();
+
+        if(configNode.credentials.has_clientid && configNode.credentials.has_clientsecret){
+            window.forceConfigNodeIntervalId = window.setTimeout(pollForceCredentialsUrl,2000);
+        }
+
+        function pollForceCredentialsUrl() {
+          console.log("Polling...")
+          var clientid = $("#node-config-input-clientid").val();
+          var clientsecret = $("#node-config-input-clientsecret").val();
+          if(clientid && clientsecret){
+            var username = $("#node-config-input-username").val();
+            var loginurl = $("#node-config-input-loginurl option:selected").val();
+            var url = 'force-credentials/'+id+'/force-credentials?clientid='+clientid
+                      +'&clientsecret='+clientsecret
+                      +'&callback='+encodeURIComponent(callback)
+                      +'&username='+username
+                      +'&loginurl='+encodeURIComponent(loginurl);
+            $.getJSON(url,function(data) {
+                if (data.authUrl) {
+                    $("#node-config-start-auth").attr("href",data.authUrl)
+                                                .removeClass("disabled");
+                    delete window.forceConfigNodeIntervalId;
+                } else {
+                    window.forceConfigNodeIntervalId = window.setTimeout(pollForceCredentialsUrl,2000);
+                }
+            });
+          }
+        }
+
+        $("#node-config-start-auth").mousedown(function() {
+        });
+
+        $("#node-config-start-auth").click(function(e) {
+            var ahref = $("#node-config-start-auth").attr("href");
+            if (ahref === "#") {
+                e.preventDefault();
+            }
+        });
+
+
+        $("#node-config-input-logintype").change(function () {
+            var passwordel = $(".input-password-row");
+            var tokenel = $(".input-token-row");
+            var clientidel = $(".input-clientid-row");
+            var secretel = $(".input-clientsecret-row");
+            var buttonel = $(".input-startauth-row");
+            var loginurlel = $(".input-loginurl-row");
+            var tooltipel = $("#node-config-force-tooltip");
+
+            var id = $("#node-config-input-logintype option:selected").val();
+            if (id == 'oauth') {
+              passwordel.hide();
+              tokenel.hide();
+              clientidel.show();
+              secretel.show();
+              buttonel.show();
+              tooltipel.show();
+              loginurlel.show();
+            } else if (id == 'Username-Password') {
+              passwordel.show();
+              tokenel.show();
+              clientidel.hide();
+              secretel.hide();
+              buttonel.hide();
+              loginurlel.show();
+            } else {
+              passwordel.hide();
+              tokenel.hide();
+              clientidel.hide();
+              secretel.show();
+              buttonel.hide();
+              tooltipel.hide();
+              loginurlel.hide();
+            }
+        });
+    }
+  });
+</script>
+
+
+
+<script type="text/x-red" data-template-name="salesforce-create-case out">
+  <div class="form-row">
+    <label for="node-input-salesforce"><i class="fa fa-user"></i> Log in as</label>
+    <input type="text" id="node-input-salesforce">
+  </div>
+  <div class="form-row">
+    <label for="node-input-subject"><i class="fa fa-file-text"></i> Subject</label>
+    <input type="text" id="node-input-subject" placeholder="subject">
+  </div>
+  <div class="form-row">
+    <label for="node-input-description"><i class="fa fa-paragraph"></i> Description</label>
+    <input type="text" id="node-input-extname" placeholder="description">
+  </div>
+  <div class="form-row">
+    <label for="node-input-priority"><i class="fa fa-list-ol"></i> Priority</label>
+    <select type="text" id="node-input-priority">
+      <option value="high">High</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Node Name">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="salesforce-create-case out">
+   <p>Create a Case in Salesforce with Xively device information attached.</p>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType('salesforce-create-case out', {
+    category: 'salesforce',
+    color: "#009CDB",
+    defaults: {
+      salesforce: { type: 'salesforce', required: true },
+      operation: { value: 'create' },
+      sobject: { value: 'Case' },
+      subject: {value: ''},
+      description: {value: ''},
+      priority: {value:'medium'},
+      name: { value: 'Device Case' }
+    },
+    inputs: 1,
+    outputs: 0,
+    icon: "sf_blue.png", 
+    label: function () {
+      var forceNode = RED.nodes.node(this.salesforce);
+      return this.name || 'Create Case';
+    },
+    labelStyle: function () {
+      return '';
+    },
+    paletteLabel: function() {
+      return "Device Case";
+    },
+    oneditprepare: function () {
+      var extel = $(".input-extname-row");
+      var sobjel = $(".input-sobject-row");
+      $("#node-input-operation").change(function () {
+        var id = $("#node-input-operation option:selected").val();
+        if (id == 'query') {
+          extel.hide();
+          sobjel.hide();
+        } else if (id == 'upsert') {
+          extel.show();
+          sobjel.show();
+        } else {
+          extel.hide();
+          sobjel.show();
+        }
+      });
+    }
+  });
+</script>
+
+<!--
+<script type="text/x-red" data-template-name="salesforce-inventory-request out">
+  <div class="form-row">
+    <label for="node-input-salesforce"><i class="fa fa-user"></i> Log in as</label>
+    <input type="text" id="node-input-salesforce">
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Node Name">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="salesforce-inventory-request out">
+   <p>Create an Inventory Request in Salesforce based on device info.</p>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType('salesforce-inventory-request out', {
+    category: 'salesforce',
+    color: "#009CDB",
+    defaults: {
+      salesforce: { type: 'salesforce', required: true },
+      name: { value: 'Inventory Request' }
+    },
+    inputs: 1,
+    outputs: 0,
+    icon: "sf_blue.png", 
+    label: function () {
+      var forceNode = RED.nodes.node(this.salesforce);
+      return this.name || 'Inventory Request';
+    },
+    labelStyle: function () {
+      return '';
+    },
+    paletteLabel: function() {
+      return "Inventory Request";
+    }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="salesforce-emergency-request out">
+  <div class="form-row">
+    <label for="node-input-salesforce"><i class="fa fa-user"></i> Log in as</label>
+    <input type="text" id="node-input-salesforce">
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Node Name">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="salesforce-emergency-request out">
+   <p>Create an Emergency Request in Salesforce based on device info.</p>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType('salesforce-emergency-request out', {
+    category: 'salesforce',
+    color: "#009CDB",
+    defaults: {
+      salesforce: { type: 'salesforce', required: true },
+      name: { value: 'Emergency Request' }
+    },
+    inputs: 1,
+    outputs: 0,
+    icon: "sf_blue.png", 
+    label: function () {
+      var forceNode = RED.nodes.node(this.salesforce);
+      return this.name || 'Emergency Request';
+    },
+    labelStyle: function () {
+      return '';
+    },
+    paletteLabel: function() {
+      return "Emergency Request";
+    }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="salesforce-checkin-request out">
+  <div class="form-row">
+    <label for="node-input-salesforce"><i class="fa fa-user"></i> Log in as</label>
+    <input type="text" id="node-input-salesforce">
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Node Name">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="salesforce-checkin-request out">
+   <p>Create a CheckIn/CheckOut Request in Salesforce based on device info.</p>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType('salesforce-checkin-request out', {
+    category: 'salesforce',
+    color: "#009CDB",
+    defaults: {
+      salesforce: { type: 'salesforce', required: true },
+      name: { value: 'CheckIn Request' }
+    },
+    inputs: 1,
+    outputs: 0,
+    icon: "sf_blue.png", 
+    label: function () {
+      var forceNode = RED.nodes.node(this.salesforce);
+      return this.name || 'CheckIn Request';
+    },
+    labelStyle: function () {
+      return '';
+    },
+    paletteLabel: function() {
+      return "CheckIn Request";
+    }
+  });
+</script>
+-->

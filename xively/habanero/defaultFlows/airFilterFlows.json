@@ -1,0 +1,50 @@
+[
+    {
+        "type": "tab",
+        "id": "cdac0bb5.7b18e8",
+        "label": "Flow 1"
+    },
+    {
+        "id": "3c015800.c3fea8",
+        "type": "xively-user-credentials",
+        "z": "",
+        "creds_name": "OrchestratorUser"
+    },
+    {
+        "id": "c357e713.840358",
+        "type": "salesforce",
+        "z": "",
+        "username": "test@user.com",
+        "loginurl": "https://login.salesforce.com",
+        "logintype": "Username-Password"
+    },
+    {
+        "id": "b54ba5c8.c031d8",
+        "type": "xively-channel",
+        "z": "cdac0bb5.7b18e8",
+        "xively_creds": "3c015800.c3fea8",
+        "name": "",
+        "device_template": "",
+        "device_channel": "",
+        "payload_format": "json",
+        "x": 123.5,
+        "y": 79,
+        "wires": [
+            [
+                "df3d3e74.23c05"
+            ]
+        ]
+    },
+    {
+        "id": "df3d3e74.23c05",
+        "type": "debug",
+        "z": "cdac0bb5.7b18e8",
+        "name": "Debug topicMeta",
+        "active": true,
+        "console": "false",
+        "complete": "topicMeta",
+        "x": 507.5,
+        "y": 120,
+        "wires": []
+    }
+]

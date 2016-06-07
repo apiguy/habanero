@@ -1,0 +1,222 @@
+<!--
+  Copyright 2016 LogMeIn Inc
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="xively-channel">
+    <div id="channel-config" style="display:none;">
+        <div class="form-row">
+            <label for="node-input-device_template"><i class="fa fa-hdd-o"></i> <span data-i18n="xively.label.device-type"></span></label>
+            <select type="text" id="node-input-device_template" style="display: inline-block; vertical-align: middle; width:60%;">
+            </select>
+        </div>
+        <div class="form-row">
+            <label for="node-input-device_channel"><i class="fa fa-arrows-h "></i> <span data-i18n="xively.label.channel-type"></span></label>
+            <select type="text" id="node-input-device_channel" style="display: inline-block; vertical-align: middle; width:60%;">
+                <option data-i18n="xively.label.select-channel-type"></option>
+            </select>
+        </div>
+        <div id="payload_format" class="form-row">
+            <label for="node-input-payload_format"><i class="fa fa-code "></i> <span data-i18n="xively.label.payload-format"></span></label>
+            <select type="text" id="node-input-payload_format" style="display: inline-block; vertical-align: middle; width:60%;">
+                <option value="raw" data-i18n="xively.label.raw"></option>
+                <option value="json" data-i18n="xively.label.json"></option>
+            </select>
+        </div>
+    </div>
+    <div id="channel-config-loader" style="margin: 30px auto;text-align:center;">
+        <img src="red/images/spin.svg" style="height: 30px; margin-right: 10px; " class="login-spinner"/>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name this node (optional)">
+    </div>
+    <div class="form-row" style="display:none;">
+        <input type="hidden" id="node-input-xively_creds">
+        <input type="hidden" id="node-input-org_ancestry">
+        <input type="hidden" id="node-input-default_name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="xively-channel">
+   <p>Xively input/output for a device template channel.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('xively-channel',{
+        category: 'xively',    
+        color:"#E33E2C",
+        defaults: {            
+            xively_creds: {type:"xively-user-credentials",required:true},
+            name: {value:""},   
+            default_name: {value:""},
+            device_template: {value:"", required:true},
+            device_channel: {value:"", required:true},
+            payload_format: {value:"raw", required:true}
+        },
+        inputs:0,             
+        outputs:1,              
+        icon: "xi.png",    
+        label: function() {    
+            return this.name||this.default_name||"Channel In";
+        },
+        labelStyle: function() { 
+            return "";
+        },
+        paletteLabel: function() {
+          return "Channel In";
+        },
+        oneditprepare: function(){
+            // WOW this function is HUGE, can we find a way to clean this up?
+            var xivelyCredsInput = $("#node-input-xively_creds");
+            var channelConfigDiv = $("#channel-config");
+            var channelConfigLoaderDiv = $("#channel-config-loader");
+            var deviceTemplateInput = $("#node-input-device_template");
+            var channelInput = $("#node-input-device_channel");
+            var orgFilterInput = $("#node-input-org_filter");
+            var subOrgFilterInput = $("#node-input-sub_org_filter");
+            var subOrgFilterRow = $("#sub_org_filter_row");
+            var orgAncestryInput = $("#node-input-org_ancestry");
+            var payloadFormatInput = $("#node-input-payload_format");
+            var payloadFormatRow = $("#payload_format");
+            var channelTemplates = {};
+
+            var selectDeviceTypeMsg = this._("xively.label.select-device-type");
+            var selectChannelTypeMsg = this._("xively.label.select-channel-type");
+            var selectOrgFilterMsg = this._("xively.label.select-org-filter");
+            var removeOrgFilterMsg = this._("xively.label.remove-org-filter");
+            var selectSubOrgFilterMsg = this._("xively.label.select-sub-org-filter");
+
+            var xively_creds = this.xively_creds;
+
+            var device_template = this.device_template;
+            var device_channel = this.device_channel;
+            var org_filter = this.org_filter;
+            var org_ancestry = (!this.org_ancestry) ? [] : JSON.parse(this.org_ancestry);
+
+            function setupDeviceTemplates(){
+                $.getJSON('xively/deviceTemplates/'+xively_creds,function(templates) {
+                    deviceTemplateInput.off("change", onDeviceTemplateInputChange);
+                    deviceTemplateInput.empty();
+                    deviceTemplateInput.append(new Option(selectDeviceTypeMsg, ""));
+                    $.each(templates, function(i, template){
+                        deviceTemplateInput.append(new Option(
+                            template.name, 
+                            template.id));
+                        channelTemplates[template.id] = template.channelTemplates;
+                    });
+   
+                    deviceTemplateInput.prop('disabled', false);
+                    if(device_template !== "" && 
+                        deviceTemplateInput.find("option[value='" + device_template + "']").length !== 0){
+                        deviceTemplateInput.val(device_template);
+                        deviceTemplateInput.removeClass("input-error");
+                        setupChannelTemplates(device_template);
+                    }
+
+                    deviceTemplateInput.on("change", onDeviceTemplateInputChange);
+                    channelConfigLoaderDiv.hide();
+                    channelConfigDiv.show();
+                });
+            }
+
+            function setupChannelTemplates(deviceTemplateId){
+                channelInput.empty();
+                channelInput.append(new Option(selectChannelTypeMsg, ""));
+                var templates = channelTemplates[deviceTemplateId];
+                $.each(templates, function(i, template){
+                    var selected = template.id == device_channel;
+                    channelInput.append(new Option(
+                        template.name, 
+                        template.id));
+                });
+                channelInput.prop('disabled', false);
+                if(device_channel !== "" && 
+                    channelInput.find("option[value='" + device_channel + "']").length !== 0){
+                    channelInput.val(device_channel);
+                    channelInput.removeClass("input-error");
+                    onDeviceChannelInputChange();
+                }
+            }
+
+            function onXivelyCredsInputChange(e){
+                var currentVal = xivelyCredsInput.val();
+                if(currentVal == "" || currentVal == "_ADD_"){
+                    deviceTemplateInput.prop('disabled', 'disabled');
+                    channelInput.prop('disabled', 'disabled');
+                }else{
+                    xively_creds = currentVal;
+                    setupDeviceTemplates();
+                }
+            }
+
+            function onDeviceTemplateInputChange(e){
+                var currentVal = deviceTemplateInput.val();
+                if(currentVal == "" || currentVal == null){
+                    channelInput.empty();
+                    channelInput.append(new Option(selectChannelTypeMsg, ""));
+                    channelInput.prop('disabled', 'disabled');
+                }else{
+                    setupChannelTemplates(currentVal);
+                }
+            }
+
+            function onDeviceChannelInputChange(e){
+                var currentVal = channelInput.val();
+                var currDeviceTemplateId = deviceTemplateInput.val();
+                if(currentVal == "" || currentVal == null){
+                    //pass
+                }else{
+                    var channels = channelTemplates[currDeviceTemplateId];
+                    var channelTemplate = $.grep(channels, function(c) { return c.id == currentVal; })[0];
+                    switch(channelTemplate.persistenceType){
+                        case "timeSeries":
+                            payloadFormatInput.val("json");
+                            payloadFormatInput.removeClass("input-error");
+                            payloadFormatInput.prop('disabled', false);
+                            break
+                        case "simple":
+                        default:
+                            payloadFormatInput.val("raw");
+                            payloadFormatInput.removeClass("input-error");
+                            payloadFormatInput.prop('disabled', 'disabled');
+                            break
+                    }
+                }
+            }
+
+            if (!xively_creds || xively_creds === "") {
+                deviceTemplateInput.prop('disabled', 'disabled');
+            }else{
+                setupDeviceTemplates();
+            }
+
+            if (!this.device_template || this.device_template === "") {
+                channelInput.prop('disabled', 'disabled');
+            }
+
+            xivelyCredsInput.on("change", onXivelyCredsInputChange);
+            deviceTemplateInput.on("change", onDeviceTemplateInputChange);
+            channelInput.on("change", onDeviceChannelInputChange);
+
+
+        },
+        oneditsave: function(){
+            var defaultName = $.trim($("#node-input-device_template option:selected" ).text() +" - "+$("#node-input-device_channel option:selected" ).text());
+            if(defaultName !== "-"){
+                $("#node-input-default_name").val(defaultName);
+            }
+        }
+    });
+</script>

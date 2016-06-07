@@ -52,6 +52,12 @@ var storageModuleInterface = {
             }
             return storageModule.init(settings);
         },
+        getValue: function(key, defaultValue) {
+            return storageModule.getValue(key, defaultValue);
+        },
+        saveValue: function(key, value, defaultValue) {
+            return storageModule.getValue(key, value, defaultValue);
+        },
         getFlows: function() {
             return storageModule.getFlows();
         },

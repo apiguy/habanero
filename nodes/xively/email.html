@@ -1,0 +1,115 @@
+<!--
+  Copyright 2016 LogMeIn Inc
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="xi-email out">
+    <div class="form-row">
+        <label for="node-input-email_input_type"><i class="fa fa-arrow-right"></i> 
+            <span data-i18n="xively.label.to"></span>
+        </label>
+        <select id="node-input-email_input_type">
+            <option value="hardcoded" data-i18n="xively.label.set_address_hardcoded"></option>
+            <option value="property" data-i18n="xively.label.set_address_by_property"></option>
+        </select>
+    </div>
+    <div class="form-row row-email_input_type" id="row-email_input_type_hardcoded">
+        <label for="node-input-email"><i class="fa fa-mobile"></i> <span data-i18n="xively.label.email"></span></label>
+        <input type="text" id="node-input-email" placeholder="email@address.com">
+    </div>
+    <div class="form-row row-email_input_type" id="row-email_input_type_property">
+        <span data-i18n="xively.label.property"></span> 
+        <input type="text" id="node-input-property" style="width: 300px;"/>
+    </div>
+    <div class="form-row">
+        <label for="node-input-subject"><i class="fa fa-mobile"></i> <span data-i18n="xively.label.subject"></span></label>
+        <input type="text" id="node-input-subject" placeholder="(Email Subject)">
+    </div>
+    <input type="hidden" id="node-input-body" autofocus="autofocus">
+    <div class="form-row node-text-editor-row">
+        <div style="height: 125px;" class="node-text-editor" id="node-input-body-editor" ></div>
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-include_device_data" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-include_device_data" style="width: 70%;" data-i18n="xively.label.include_device_data"></label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row" style="display:none;">
+        <input type="hidden" id="node-input-xively_creds">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="xi-email out">
+   <p>Sends an email.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('xi-email out',{
+        category: 'output',    
+        color:"#1e8c88",
+        defaults: {            
+            name: {value:""},   
+            xively_creds: {type:"xively-user-credentials",required:true},
+            email_input_type: {value:"hardcoded", required:true},
+            email: {value:"", require:true},  
+            property: {value:"payload" },
+            propertyType: { value:"msg" },
+            body: {value:"", required:true},
+            subject: {value:""}, 
+            include_device_data:{value:true}
+        },
+        inputs:1,             
+        outputs:0,              
+        icon: "envelope_output.png",
+        align: "right",    
+        label: function() {    
+            return this.name||"Email";
+        },
+        labelStyle: function() { 
+            return "";
+        },
+        paletteLabel: function() {
+          return "Email";
+        },
+        oneditprepare: function(){
+            var node = this;
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-body-editor',
+                mode: 'ace',
+                value: $("#node-input-body").val()
+            });
+
+            $("#node-input-email_input_type").change(function() {
+                var id = $("#node-input-email_input_type option:selected").val();
+                $(".row-email_input_type").hide();
+                $("#row-email_input_type_"+id).show();
+            });
+
+            var id = $("#node-input-email_input_type option:selected").val();
+            $(".row-email_input_type").hide();
+            $("#row-email_input_type_"+id).show();
+
+            $("#node-input-property").typedInput({default:this.propertyType||'msg',types:['msg','flow','global']});
+        },
+        oneditsave: function() {
+            this.propertyType = $("#node-input-property").typedInput('type');
+            $("#node-input-body").val(this.editor.getValue())
+            delete this.editor;
+        },
+    });
+</script>

@@ -211,6 +211,8 @@ var RED = (function() {
 
         RED.deploy.init(RED.settings.theme("deployButton",null));
 
+        //RED.help.init();
+
         RED.keyboard.add(/* ? */ 191,{shift:true},function(){RED.keyboard.showHelp();d3.event.preventDefault();});
         RED.comms.connect();
 

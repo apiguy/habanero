@@ -1,0 +1,31 @@
+{
+	"xively": {
+		"services": {
+			"blueprint": {
+				"scheme":"https://",
+				"host":"blueprint.demo.xively.com",
+				"port":80,
+				"apiRoot":"/api/v1/"
+			},
+			"idm": {
+				"scheme":"https://",
+				"host":"id.demo.xively.com",
+				"port":80,
+				"apiRoot":"/api/v1/"
+			},
+			"timeseries":{
+				"scheme":"https://",
+				"host":"timeseries.demo.xively.com",
+				"port":80,
+				"apiRoot":"/api/v4/data/"
+			}
+		},
+		"habanero-proxy":{
+			"scheme":"https://",
+			"host":"xi-ext-services.herokuapp.com",
+			"port":80,
+			"apiRoot":"/api/v1/"
+		},
+		"CONNECTION_DEVICE_LIMIT":1000
+	}
+}

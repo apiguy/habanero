@@ -171,5 +171,7 @@
 <script src="vendor/ace/ext-language_tools.js"></script>
 <script src="{{ asset.red }}"></script>
 
+<!-- wista for help videos -->
+<script charset="ISO-8859-1" src="//fast.wistia.com/assets/external/E-v1.js" async></script>
 </body>
 </html>

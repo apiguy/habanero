@@ -24,7 +24,7 @@ var permissions = require("./permissions");
 
 var theme = require("../theme");
 
-var xiRed = require("node-red-contrib-xively");
+var xiRed = require("../../../xively/");
 
 var settings = null;
 var log = null

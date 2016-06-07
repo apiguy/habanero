@@ -1,0 +1,89 @@
+<!--
+  Copyright 2016 LogMeIn Inc
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="xively-user-credentials">
+    <div class="form-row" id="node-config-xively-user-credentials-row">
+        <p style="margin-top: 10px;"><b>1.</b> <span data-i18n="xively.label.register"></span> <a href="#" target="_blank" style="text-decoration:underline;">xively.com</a></p>
+    </div>
+    <div class="form-row">
+        <label style="margin-left: 10px; margin-right: -10px;" for="node-config-input-creds_name"><i class="fa fa-tag"></i> <span data-i18n="xively.creds.label.name"></span></label>
+        <input type="hidden" id="node-config-input-creds_name">
+    </div>
+    <div class="form-row">
+        <label style="margin-left: 10px; margin-right: -10px;" for="node-config-input-account_id"><i class="fa fa-university"></i> <span data-i18n="xively.creds.label.accountId"></span></label>
+        <input type="text" id="node-config-input-account_id">
+    </div>
+    <div class="form-row">
+        <label style="margin-left: 10px; margin-right: -10px;" for="node-config-input-username"><i class="fa fa-user"></i> <span data-i18n="xively.creds.label.username"></span></label>
+        <input type="text" id="node-config-input-username">
+    </div>
+    <div class="form-row">
+        <label style="margin-left: 10px; margin-right: -10px;" for="node-config-input-password"><i class="fa fa-key"></i> <span data-i18n="xively.creds.label.password"></span></label>
+        <input type="password" id="node-config-input-password">
+    </div>
+    <div class="form-row">
+        <label style="margin-left: 10px; margin-right: -10px;" for="node-config-input-mqtt_secret"><i class="fa fa-key"></i> <span data-i18n="xively.creds.label.mqtt-secret"></span></label>
+        <input type="password" id="node-config-input-mqtt_secret">
+    </div>
+</script>
+
+<script type="text/javascript">
+(function() {
+    RED.nodes.registerType('xively-user-credentials',{
+        category: 'config',
+        defaults: {
+            creds_name: {value:""}
+        },
+        credentials: {
+            creds_name: {type: "text"},
+            account_id: {type: "text"},
+            user_id: {type: "text"},
+            account_user_id: {type: "text"},
+            username: {type: "text"},
+            password: {type: "password"},
+            mqtt_secret: {type: "password"}
+        },
+        label: function() {
+            return this.creds_name;
+        },
+        exportable: false,
+        oneditprepare: function() {
+            var xivelyUserCredsConfigNodeId = this.id;
+            var register = this._("xively.label.register");
+            var c = this._("xively.creds.name");
+            function showXivelyName(credsName) {
+                $("#node-config-input-screen_name").val(sn);
+                $("#node-config-twitter-row").html('<label><i class="fa fa-user"></i> '+credsName+'</label><span class="input-xlarge uneditable-input">'+credsName+'</span><input type="text" id="node-config-input-creds_name" value="'+credsName+'">');
+            }
+
+            if (!this.account_id || this.account_id === "") {
+
+            } else {
+                if (this.credentials.creds_name) {
+                    showXivelyName(this.credentials.creds_name);
+                } else {
+  
+                }
+            }
+
+        },
+        oneditsave: function() {
+        },
+        oneditcancel: function(adding) {
+        }
+    });
+})();
+</script>
