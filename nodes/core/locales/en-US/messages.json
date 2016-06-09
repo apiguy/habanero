@@ -699,6 +699,7 @@
             "xively":"Xively",
             "name": "Name",
             "device-type": "Device Type",
+
             "select-device-type":"Select a device type...",
             "channel-type": "Channel",
             "select-channel-type": "Select a channel type...",
@@ -751,6 +752,14 @@
             "failed":"failed"
         },
         "errors": {
+        }
+    },
+    "heroku-connect":{
+        "label":{
+            "connect-table":"Object",
+            "table-mappings":"Mappings",
+            "mapping":"Mapping",
+            "select-table":"Select your SFDC object"
         }
     },
     "weather": {
