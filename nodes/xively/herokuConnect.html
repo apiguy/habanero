@@ -17,12 +17,23 @@
 <script type="text/x-red" data-template-name="heroku-connect insert">
     <div id="schema-config" style="display:none;">
         <div class="form-row">
-            <label for="node-input-table"><i class="fa fa-hdd-o"></i> <span data-i18n="heroku-connect.label.connect-table"></span></label>
-            <select type="text" id="node-input-table" style="display: inline-block; vertical-align: middle; width:60%;">
+            <label for="node-input-crudtype">Operation</label>
+            <select type="text" id="node-input-crudtype" style="display: inline-block; vertical-align: middle; width:60%;">
+                <option value="insert">Insert</option>
+                <option value="update">Update</option>
             </select>
         </div>
         <div class="form-row">
-            <label><i class="fa fa-hdd-o"></i> <span data-i18n="heroku-connect.label.table-mappings"></span></label>
+            <label for="node-input-table"><i class="fa fa-sitemap"></i> <span data-i18n="heroku-connect.label.connect-table"></span></label>
+            <select type="text" id="node-input-table" style="display: inline-block; vertical-align: middle; width:60%;">
+            </select>
+        </div>
+        <div class="form-row" id="where-row">
+            <label for="node-input-where">Where SFID:</label>
+            <input id="node-input-where" style="width:200px;" />
+        </div>
+        <div class="form-row">
+            <label><i class="fa fa-exchange"></i> <span data-i18n="heroku-connect.label.table-mappings"></span></label>
         </div>
         <div class="form-row node-input-mappings-container-row" style="margin-bottom: 0px;">
             <div id="node-input-mappings-container-div" style="box-sizing: border-box; border-radius: 5px; height: 250px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
@@ -55,6 +66,9 @@
         color:"#401196",
         defaults: {            
             name: {value:""},   
+            crudtype: {value:"insert", required:true},
+            whereValueType: {value:"msg", required:true},
+            whereValue: {value:"payload", required:true},
             table: {value:"", required:true},
             mappings: {value:[], required:true}
         },
@@ -62,13 +76,13 @@
         outputs:1,              
         icon: "heroku.png",    
         label: function() {    
-            return this.name||this.default_name||"Heroku Connect Insert";
+            return this.name||this.default_name||"Heroku Connect";
         },
         labelStyle: function() { 
             return "";
         },
         paletteLabel: function() {
-          return "Heroku Connect Insert";
+          return "Heroku Connect";
         },
         oneditprepare: function(){
             var labels = {"caseteamtemplaterecord": "Predefined Case Team Record", "leadcleaninfo": "Lead Clean Info", "combinedattachment": "Note, Attachment, Google Doc And File", "feedpollvote": "Feed Poll Vote", "processnode": "Process Node", "pricebookentry": "Price Book Entry", "streamingchannel": "Streaming Channel", "contentversion": "Content Version", "auradefinition": "Lightning Component Definition", "casecomment": "Case Comment", "emailtemplate": "Email Template", "caseteamtemplatemember": "Predefined Case Team Member", "announcement": "Announcement", "pricebook2history": "Price Book History", "group": "Group", "authprovider": "Auth. Provider", "solution": "Solution", "accountfeed": "Account Feed", "casehistory": "Case History", "orgwideemailaddress": "Organization-wide From Email Address", "campaignmember": "Campaign Member", "orderfeed": "Order Feed", "userlogin": "User Login", "feedcomment": "Feed Comment", "leadshare": "Lead Share", "dataclouddandbcompany": "D&B Company", "holiday": "Holiday", "searchpromotionrule": "Promoted Search Term", "accountcontactrole": "Account Contact Role", "processinstancenode": "Process Instance Node", "macroshare": "Macro Share", "dashboardcomponent": "Dashboard Component", "staticresource": "Static Resource", "feedlike": "Feed Like", "usershare": "User Share", "emailservicesaddress": "Email Services Address", "duplicaterecordset": "Duplicate Record Set", "campaignmemberstatus": "Campaign Member Status", "packagelicense": "Package License", "casefeed": "Case Feed", "casesolution": "Case Solution", "report": "Report", "apexclass": "Apex Class", "recordtype": "Record Type", "duplicaterule": "Duplicate Rule", "weblink": "Custom Button or Link", "knowledgeableuser": "Knowledgeable User", "name": "Name", "accountcleaninfo": "Account Clean Info", "userpackagelicense": "User Package License", "mailmergetemplate": "Mail Merge Template", "custompermissiondependency": "Custom Permission Dependency", "ownedcontentdocument": "User Owned File", "groupmember": "Group Member", "casestatus": "Case Status Value", "dcsocialprofile": "Datacloud Social Profile", "secureagentpluginproperty": "Secure Agent Plug-in Property", "solutionhistory": "Solution History", "cronjobdetail": "Cron Job", "fiscalyearsettings": "Fiscal Year Settings", "listview": "List View", "assetfeed": "Asset Feed", "declinedeventrelation": "Declined Event Relation", "forecastshare": "Forecast Share", "domain": "Domain", "authconfigproviders": "Authentication Configuration Auth. Provider", "assignmentrule": "Assignment Rule", "activityhistory": "Activity History", "secureagent": "Secure Agent", "vote": "Vote", "apextrigger": "Apex Trigger", "emailservicesfunction": "Email Service", "campaignshare": "Campaign Share", "campaignfeed": "Campaign Feed", "event": "Event", "reportfeed": "Report Feed", "topicfeed": "Topic Feed", "contactfeed": "Contact Feed", "lead": "Lead", "emaildomainkey": "Email Domain Key", "eventlogfile": "Event Log File", "orderhistory": "Order History", "topicassignment": "Record", "opportunitypartner": "Opportunity Partner", "caseshare": "Case Share", "emailstatus": "Email Status", "apextestqueueitem": "Apex Test Queue Item", "processinstancestep": "Process Instance Step", "authsession": "Auth Session", "dashboard": "Dashboard", "assethistory": "Asset History", "contactshare": "Contact Share", "feedpollchoice": "Feed Poll Choice", "contentdistribution": "Content Delivery", "undecidedeventrelation": "Undecided Event Relation", "orderitemfeed": "Order Product Feed", "platformaction": "Platform Action", "auradefinitionbundle": "Lightning Component Bundle", "processinstanceworkitem": "Approval Request", "macrohistory": "Macro History", "assetshare": "Asset Share", "eventfeed": "Event Feed", "userlistviewcriterion": "User List View Criteria", "samlssoconfig": "SAML Single Sign-On Setting", "sitefeed": "Site", "chatteractivity": "Chatter Activity", "ideacomment": "Idea Comment", "opportunitylineitem": "Opportunity Product", "orderitem": "Order Product", "clientbrowser": "Client Browser", "contract": "Contract", "dashboardfeed": "Dashboard Feed", "noteandattachment": "Note and Attachment", "leadfeed": "Lead Feed", "folder": "Folder", "duplicaterecorditem": "Duplicate Record Item", "thirdpartyaccountlink": "Third Party Account Link", "appmenuitem": "AppMenuItem", "user": "User", "caseteamtemplate": "Predefined Case Team", "note": "Note", "campaign": "Campaign", "contactcleaninfo": "Contact Clean Info", "entitysubscription": "Entity Subscription", "apexcomponent": "Visualforce Component", "contentdocumenthistory": "Content Document History", "loginip": "Login IP", "period": "Period", "community": "Zone", "solutionfeed": "Solution Feed", "xively__concariademo2__c": "ConcariaDemo", "partnerrole": "Partner Role Value", "dashboardcomponentfeed": "Dashboard Component Feed", "contracthistory": "Contract History", "additionalnumber": "Additional Directory Number", "eventrelation": "Event Relation", "objectpermissions": "Object Permissions", "permissionsetlicense": "Permission Set License", "contentdocument": "Content Document", "apexlog": "Apex Debug Log", "contractstatus": "Contract Status Value", "categorydata": "Category Data", "documentattachmentmap": "Document Entity Map", "product2": "Product", "asset": "Asset", "feeditem": "Feed Item", "acceptedeventrelation": "Accepted Event Relation", "asyncapexjob": "Apex Job", "permissionsetlicenseassign": "Permission Set License Assignment", "fieldpermissions": "Field Permissions", "leadstatus": "Lead Status Value", "orderitemhistory": "Order Product History", "opportunityfieldhistory": "Opportunity Field History", "datacloudpurchaseusage": "Data.com Usage", "lookedupfromactivity": "Lookups from Activity", "openactivity": "Open Activity", "solutionstatus": "Solution Status Value", "oauthtoken": "Oauth Token", "idea": "Idea", "aggregateresult": "Aggregate Result", "authconfig": "Authentication Configuration", "feedtrackedchange": "Feed Tracked Change", "profile": "Profile", "caseteammember": "Case Team Member", "tenantusageentitlement": "Tenant Usage Entitlement", "taskpriority": "Task Priority Value", "apexpage": "Visualforce Page", "setupaudittrail": "Setup Audit Trail Entry", "case": "Case", "account": "Account", "userlicense": "User License", "datacloudsocialhandle": "Data.com Social Handle", "processdefinition": "Process Definition", "brandtemplate": "Letterhead", "userfeed": "User Feed", "collaborationinvitation": "Chatter Invitation", "permissionset": "Permission Set", "accounthistory": "Account History", "domainsite": "Custom URL", "site": "Site", "taskfeed": "Task Feed", "externaldatauserauth": "External Data User Authentication", "userrole": "Role", "collaborationgroupmember": "Group Member", "dcsocialprofilehandle": "Datacloud Social Profile Handle", "attachedcontentdocument": "Attached Content Document", "contentworkspacedoc": "Library Document", "apextestresult": "Apex Test Result", "topic": "Topic", "processinstance": "Process Instance", "userprovisioningrequestshare": "User Provisioning Request Share", "datacloudcontact": "Data.com Contact", "opportunityshare": "Opportunity Share", "partner": "Partner", "installedmobileapp": "Installed Mobile App", "taskstatus": "Task Status Value", "contentdistributionview": "Content Delivery View", "contractfeed": "Contract Feed", "userlistview": "User List View", "processinstancehistory": "Process Instance History", "userrecordaccess": "User Record Access", "collaborationgroupfeed": "Group Feed", "contentdocumentlink": "Content Document Link", "datacloudcompany": "Data.com Company", "contentworkspace": "Library", "contentdocumentfeed": "ContentDocument Feed", "custompermission": "Custom Permission", "attachment": "Attachment", "document": "Document", "sitehistory": "Site History", "permissionsetassignment": "Permission Set Assignment", "categorynode": "Category Node", "leadhistory": "Lead History", "businessprocess": "Business Process", "streamingchannelshare": "Streaming Channel Share", "businesshours": "Business Hours", "opportunityhistory": "Opportunity History", "pricebook2": "Price Book", "crontrigger": "Scheduled Jobs", "externaldatasource": "External Data Source", "queuesobject": "Queue Sobject", "accountshare": "Account Share", "casecontactrole": "Case Contact Role", "scontrol": "Custom S-Control", "recentlyviewed": "Recently Viewed", "secureagentplugin": "Secure Agent Plug-in", "collaborationgroup": "Group", "setupentityaccess": "Setup Entity Access", "callcenter": "Call Center", "contacthistory": "Contact History", "collaborationgrouprecord": "Group Record", "opportunity": "Opportunity", "product2feed": "Product Feed", "opportunitystage": "Opportunity Stage", "dandbcompany": "D&B Company", "task": "Task", "corswhitelistentry": "CORS Whitelist Origin", "macro": "Macro", "opportunitycontactrole": "Opportunity Contact Role", "userpreference": "User Preference", "contractcontactrole": "Contract Contact Role", "userprovisioningrequest": "User Provisioning Request", "accountpartner": "Account Partner", "pushtopic": "Push Topic", "opportunityfeed": "Opportunity Feed", "contact": "Contact", "contentversionhistory": "Content Version History", "caseteamrole": "Case Team Member Role", "organization": "Organization", "customobjectuserlicensemetrics": "Custom Object Usage By User License Metric", "opportunitycompetitor": "Opportunity: Competitor", "order": "Order", "collaborationgroupmemberrequest": "Group Member Request", "datacloudownedentity": "Data.com Owned Entity"};
@@ -76,6 +90,10 @@
             var schemaConfigDiv = $("#schema-config");
             var schemaLoadingDiv = $("#schema-loader");
             var mappingsContainer = $("#node-input-mappings-container");
+            var whereInput = $("#node-input-where");
+            var crudTypeInput = $('#node-input-crudtype');
+
+            var whereRow = $("#where-row");
 
             var tableInput = $("#node-input-table");
 
@@ -205,6 +223,15 @@
                 }
             }
 
+            function onCrudTypeChange(e){
+                var currentVal = crudTypeInput.val();
+                if(currentVal == "insert"){
+                    whereRow.hide();
+                }else{
+                    whereRow.show();
+                }
+            }
+
             $("#node-input-add-mapping").click(function() {
                 addNewMapping();
                 $("#node-input-mappings-container-div").scrollTop($("#node-input-rule-mappings-div").get(0).scrollHeight);
@@ -223,9 +250,15 @@
             });
             $( "#node-input-mappings-container .node-input-mapping-handle" ).disableSelection();
 
+            whereInput.typedInput({default:'msg',types:['msg','flow','global','str']});
+            whereInput.typedInput('value', node.whereValue);
+            whereInput.typedInput('type', node.whereValueType);
+
             setupTableOptions();
+            onCrudTypeChange();
 
             tableInput.on("change", onTableInputChange);
+            crudTypeInput.on("change", onCrudTypeChange);
         },
 
         formToRules: function(node, mappingsContainer, validate){
@@ -240,7 +273,9 @@
                 m.iv = mappings.find(".column-name-select").val();
                 node.mappings.push(m);
             });
-            console.log(node.mappings);
+            var whereInput = $("#node-input-where");
+            node.whereValue = whereInput.typedInput('value');
+            node.whereValueType = whereInput.typedInput('type');
         },
 
         oneditsave: function(){
