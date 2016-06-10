@@ -18,9 +18,9 @@
 	    return decodeURIComponent(results[2].replace(/\+/g, " "));
 	}
 	var basepath = "/";
-	if(window.location.pathname.startsWith('/orchestrator/')){basepath = '/orchestrator/';}
+	if(window.location.pathname.startsWith('/orchestrator/')){basepath = '/orchestrator';}
 	$.ajax({
-		url: basepath+'auth/token',
+		url: basepath+'/auth/token',
 		method: 'POST',
 		data: {
 			client_id: 'node-red-editor',
@@ -32,7 +32,7 @@
 		},
 		success: function(data, textStatus, jqXHR){
 			var data = btoa(JSON.stringify(data));
-			window.location.href = basepath+'enableSession?ticket='+data+'&adminRoot=%2F'
+			window.location.href = basepath+'/enableSession?ticket='+data+'&adminRoot='+encodeURIComponent(basepath);
 		}
 	});
 </script>
