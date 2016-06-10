@@ -18,7 +18,7 @@
 	    return decodeURIComponent(results[2].replace(/\+/g, " "));
 	}
 	$.ajax({
-		url: '/auth/token',
+		url: (window.location.pathname.startsWith('/orchestrator/')) ? '/orchestrator/auth/token' : '/auth/token',
 		method: 'POST',
 		data: {
 			client_id: 'node-red-editor',
