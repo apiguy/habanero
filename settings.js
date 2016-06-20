@@ -183,7 +183,7 @@ module.exports = {
         {id:"help-item-third", img:"red/images/deploy-full-o.png", label:"Third Topic", sublabel:"A topic with a bit of text", embedcode:"wistia_async_j38ihh83m5"}
     ],
 
-    storageModule: require(__dirname + "/red/runtime/storage/redis.js"),
+    storageModule: require(__dirname + "/red/runtime/storage/postgres.js"),
 
     // Configure the logging output
     logging: {

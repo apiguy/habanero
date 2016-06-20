@@ -1,80 +1,43 @@
-var when = require("when");
-var redis = require('redis'),
-    redisClient = redis.createClient({
-        url: process.env.REDIS_URL,
-        retry_strategy: function (options) {
-            if (options.times_connected > 15) {
-                // End reconnecting with built in error 
-                return undefined;
-            }
-            // reconnect after 
-            return Math.max(options.attempt * 100, 3000);
-        }
-    });
+var when = require('when');
+var createKnex = require('knex');
 
-redisClient.on("error", function (err) {});
+var schema = "habanero";
+var storageTable = "storage";
+
+var knex = createKnex({
+  client: 'pg',
+  connection: process.env.DATABASE_URL
+});
 
 
 var HABANERO_SETTINGS_KEY = "habanero_settings";
 
-
 var getHabaneroSettings = function(){
     return when.promise(function(resolve, reject) {
-        redisClient.get(HABANERO_SETTINGS_KEY, function(err, reply) {
-            if (!err) {
-                if (reply === null) {
-                    return resolve(null);
-                }
-                return resolve(JSON.parse(reply));
+        knex.withSchema(schema).select('data').from(storageTable).where('key_name', HABANERO_SETTINGS_KEY).then(function(rows) {
+            if(rows.length < 1){
+                resolve(null);
+            }else{
+                resolve(JSON.parse(rows[1].data));
             }
-            log.info("Error initializing habanero_settings: " + err);
-            return resolve(null);
         });
     });
 }
 
 var setHabaneroSettings = function(value){
     return when.promise(function(resolve, reject) {
-        redisClient.set(HABANERO_SETTINGS_KEY, JSON.stringify(value), function(err, reply) {
-            if (!err) {
-                return resolve(true);
-            }
-            log.info("Redis ERROR: " + err);
-            resolve(false);
-        });
-    });
-}
-
-var getRedisKey = function(key){
-    return when.promise(function(resolve, reject) {
-        redisClient.get(key, function(err, reply) {
-            if (!err) {
-                if (reply === null) {
-                    return resolve(null);
-                }
-                return resolve(reply);
-            }
-            log.info("Error initializing obtaining key: " + err);
-            return resolve(null);
-        });
-    });
-}
-
-var setRedisKey = function(key, value){
-    return when.promise(function(resolve, reject) {
-        redisClient.set(key, value, function(err, reply) {
-            if (!err) {
-                return resolve(true);
-            }
-            log.info("Redis ERROR: " + err);
-            resolve(false);
+        var data = JSON.stringify(value);
+        knex.withSchema(schema).from(storageTable)
+        .where('key_name', HABANERO_SETTINGS_KEY)
+        .update({
+            data: data
+        }).then((updateResp) => {
+            return resolve(true);
         });
     });
 }
 
 module.exports = {
     get: getHabaneroSettings,
-    set: setHabaneroSettings,
-    getRedisKey: getRedisKey,
-    setRedisKey: setRedisKey
+    set: setHabaneroSettings
 }
