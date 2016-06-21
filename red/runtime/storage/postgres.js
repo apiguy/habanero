@@ -27,7 +27,6 @@ function setupTables(){
 
 
 function saveValue (key, value, defaultValue) {
-    console.log('save called ' + key + " "+value)
     return when.promise(function(resolve) {
     	var data = JSON.stringify(value);
     	knex.withSchema(schema).from(storageTable)
@@ -56,7 +55,10 @@ function getValue(key, defaultValue) {
     		if(rows.length < 1){
     			resolve(defaultValue);
     		}else{
-    			resolve(JSON.parse(rows[1].data));
+                if(typeof rows[0] == 'undefined'){
+                    return resolve(defaultValue);
+                }
+    			resolve(JSON.parse(rows[0].data));
     		}
     	});
     });

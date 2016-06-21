@@ -172,7 +172,6 @@ var setupHabaneroAuth = function(jwt, xiAccountId, xiAppId, xiAccessToken, reque
                 habaneroIdmUserCreds.account_user_id);
 
         }).then(function(mqttCreateResp){
-            console.log(JSON.stringify(mqttCreateResp))
             habaneroIdmUserCreds.mqtt_secret = mqttCreateResp.mqttCredential.secret;
 
             return setupDefaultFlows(habaneroIdmUserCreds, requestBody);
