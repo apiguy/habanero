@@ -4,5 +4,5 @@
   "repository": "https://github.com/xively/habanero",
   "logo": "https://node-js-sample.herokuapp.com/node.png",
   "keywords": ["xively", "iot"],
-  "addons": ["heroku-postgresql:hobby-dev"]
+  "addons": ["heroku-redis:hobby-dev"]
 }
