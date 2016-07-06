@@ -224,6 +224,54 @@ module.exports = function (RED) {
   }
   RED.nodes.registerType('salesforce-create-case out', ForceCreateCaseNode);
 
+  function ForceCreateXiMessageNode(n) {
+    RED.nodes.createNode(this, n);
+    this.salesforce = n.salesforce;
+    this.sobject = "Xively1__Xively_Message__c";
+    this.forceConfig = RED.nodes.getNode(this.salesforce);
+    this.xively_creds;
+
+    var node = this;
+
+    if (this.forceConfig) {
+      settings.get().then(function(hsettings){
+          node.xively_creds = hsettings.credsId;
+          setupNode();
+      });
+    }else {
+      this.error('missing salesforce configuration');
+    }
+
+    function setupNode(){
+      node.on('input', function (msg) {
+        node.sendMsg = function (err, result) {
+          if (err) {
+            node.error(err.toString());
+            node.status({ fill: 'red', shape: 'ring', text: 'failed' });
+          } else {
+            node.status({});
+          }
+          msg.payload = result;
+          node.send(msg);
+        };
+
+        this.forceConfig.login(function (conn, err) {
+          if(err){
+            node.sendMsg(err);
+            return;
+          }
+
+          var post_obt = {};
+          post_obt.Xively1__Message__c = JSON.stringify(msg);
+          
+          conn.sobject(node.sobject).create(post_obt, node.sendMsg);
+
+        }, msg);
+      });
+    }
+  }
+  RED.nodes.registerType('salesforce-create-xi-message out', ForceCreateXiMessageNode);
+
 
 
   function ForceCreateInventoryRequestNode(n) {

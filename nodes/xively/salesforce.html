@@ -257,6 +257,48 @@
   });
 </script>
 
+
+<script type="text/x-red" data-template-name="salesforce-create-xi-message out">
+  <div class="form-row">
+    <label for="node-input-salesforce"><i class="fa fa-user"></i> Log in as</label>
+    <input type="text" id="node-input-salesforce">
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Node Name">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="salesforce-create-xi-message out">
+   <p>Create a Xively Message in Salesforce with payload information.</p>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType('salesforce-create-xi-message out', {
+    category: 'salesforce',
+    color: "#009CDB",
+    defaults: {
+      salesforce: { type: 'salesforce', required: true },
+      name: { value: 'Create Xively Message' }
+    },
+    inputs: 1,
+    outputs: 0,
+    icon: "sf_blue.png", 
+    label: function () {
+      var forceNode = RED.nodes.node(this.salesforce);
+      return this.name || 'Create Xively Message';
+    },
+    labelStyle: function () {
+      return '';
+    },
+    paletteLabel: function() {
+      return "Xively Message";
+    },
+    oneditprepare: function () {
+    }
+  });
+</script>
+
 <!--
 <script type="text/x-red" data-template-name="salesforce-inventory-request out">
   <div class="form-row">
