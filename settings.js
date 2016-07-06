@@ -86,7 +86,7 @@ module.exports = {
     // -----------------
     // To password protect the Node-RED editor and admin API, the following
     // property can be used. See http://nodered.org/docs/security.html for details.
-    adminAuth: require("./xively").habanero.adminAuth,
+    //adminAuth: require("./xively").habanero.adminAuth,
 
     // To password protect the node-defined HTTP endpoints (httpNodeRoot), or
     // the static content (httpStatic), the following properties can be used.
@@ -183,7 +183,7 @@ module.exports = {
         {id:"help-item-third", img:"red/images/deploy-full-o.png", label:"Third Topic", sublabel:"A topic with a bit of text", embedcode:"wistia_async_j38ihh83m5"}
     ],
 
-    storageModule: require(__dirname + "/red/runtime/storage/postgres.js"),
+    storageModule: require(__dirname + "/red/runtime/storage/redis.js"),
 
     // Configure the logging output
     logging: {
