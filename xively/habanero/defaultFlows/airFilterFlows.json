@@ -39,10 +39,10 @@
         "id": "df3d3e74.23c05",
         "type": "debug",
         "z": "cdac0bb5.7b18e8",
-        "name": "Debug topicMeta",
+        "name": "Debug payload",
         "active": true,
         "console": "false",
-        "complete": "topicMeta",
+        "complete": "payload",
         "x": 507.5,
         "y": 120,
         "wires": []
