@@ -170,11 +170,11 @@ module.exports = function(RED) {
                             getJwt(node.xively_creds).then(function(jwtConfig){
                                 timeseries.getLatestActivity(jwtConfig.jwt, otherTopic)
                                 .then(function(tsResults){
-                                    if(!tsResults.hasOwnProperty('results')){
+                                    if(!tsResults.hasOwnProperty('result')){
                                         return reject("Timeseries request failure: "+JSON.stringify(tsResults));
                                     }
                                     // cache results
-                                    tsCache[otherTopic] = tsResults.results;
+                                    tsCache[otherTopic] = tsResults.result;
                                     findValueInTsData(tsCache[otherTopic], rule.sv, rule.vt, resolve, reject);
                                 });
                             });
