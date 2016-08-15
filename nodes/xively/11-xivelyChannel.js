@@ -55,7 +55,8 @@ module.exports = function(RED) {
 
         //setup mqttClient
         node.mqttClient = nodeUtil.setupMqttClient(credentials,{
-            onMessage: onMqttMessage
+            onMessage: onMqttMessage,
+            format: node.payload_format
         });
 
         try{
