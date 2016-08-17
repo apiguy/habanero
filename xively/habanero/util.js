@@ -12,7 +12,7 @@ var tSDataToJSON = function(tsData){
 	    var parts = lines[i].split(",");
 	    if(parts.length > 3){
 		    var v, t;
-		    if(!isNaN(parts[2])){
+		    if(!isNaN(parseFloat(parts[2]))){
 		    	v = parseFloat(parts[2]);
 		    	t = "num";
 		    }else{
