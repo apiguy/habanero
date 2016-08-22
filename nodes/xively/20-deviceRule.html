@@ -227,7 +227,7 @@
                 return channelOptions;
             }
 
-
+            var previousValueType = {value:"prev",label:this._("xively.label.previous"),hasValue:false};
 
             function generateRule(i,rule) {
                 var container = $('<li/>');
@@ -254,7 +254,7 @@
                     selectField.append($("<option></option>").val(operators[d].v).text(operators[d].t).prop('title', operators[d].title));
                 }
 
-                var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px; width: 145px;"}).appendTo(bottomRow).typedInput({default:'num',types:['msg','flow','global','str','num']});
+                var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px; width: 145px;"}).appendTo(bottomRow).typedInput({default:'num',types:['msg','flow','global','str','num', previousValueType]});
                 var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(bottomRow).typedInput({default:'num',types:['msg','flow','global','str','num']});
                 var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
                 var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num']});

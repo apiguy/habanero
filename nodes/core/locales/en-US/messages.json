@@ -713,6 +713,7 @@
             "register": "Register to get your credentials at",
             "xively-user-creds": "Xively Creds",
             "payload-format":"Payload",
+            "previous":"previous value",
             "to":"To",
             "field-type": "Set",
             "set_to": "To",

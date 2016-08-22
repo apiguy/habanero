@@ -59,6 +59,7 @@ module.exports = function(RED) {
 
         var node = this;
         var context = node.context();
+        node.previousValues = new Array(node.rules.length);
 
         // define node scoped functions
 
@@ -196,11 +197,18 @@ module.exports = function(RED) {
                 var rule = node.rules[i];
                 getRuleInputValue(node, rule, i, msg, tsCache).then(function(prop){
                     var v1,v2;
-                    v1 = RED.util.evaluateNodeProperty(rule.v,rule.vt,node,msg);
+                    if (rule.vt === 'prev') {
+                        v1 = node.previousValues[i];
+                    } else {
+                        v1 = RED.util.evaluateNodeProperty(rule.v,rule.vt,node,msg);
+                    }
                     v2 = rule.v2;
-                    if (typeof v2 !== 'undefined') {
+                    if (rule.v2t === 'prev') {
+                        v2 = node.previousValues[i];
+                    } else if (typeof v2 !== 'undefined') {
                         v2 = RED.util.evaluateNodeProperty(rule.v2,rule.v2t,node,msg);
                     }
+                    node.previousValues[i] = prop;
                     if (rule.t == "else") { prop = elseflag; elseflag = true; }
                     if (operators[rule.t](prop,v1,v2,rule.case)) {
                         // Rule passed
