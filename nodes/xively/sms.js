@@ -41,14 +41,20 @@ module.exports = function(RED) {
         var node = this;
 
         function formatNumber(number){
-            //strip all non-numeric chars
-            number = number.replace(/\D/g,'');
-            //must start with a 1
-            if(!number.startsWith('1')){
-                number = '1' + number;  
+            if (number.startsWith('+')){
+                //starts with +, assume number is correct 
+                //strip whitespace
+                number = number.replace(/ /g,'');
+            } else {
+                //strip all non-numeric chars
+                number = number.replace(/\D/g,'');
+                //must start with a 1
+                if(!number.startsWith('1')){
+                    number = '1' + number;  
+                }
+                //must start with a plus sign
+                number = '+' + number;
             }
-            //must start with a plus sign
-            number = '+' + number;
             return number;
         }
 
