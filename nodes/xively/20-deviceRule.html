@@ -157,7 +157,7 @@
                 var templates = channelTemplates[deviceTemplateId];
                 channelOptions = []
                 $.each(templates, function(i, template){
-                    channelOptions.push({label:template.name, value:template.id, disabled: template.persistenceType != "timeSeries"});
+                    channelOptions.push({label:template.name, value:template.id, disabled: false});
                 });
                 if(rulesContainer.children().length > 0){
                     //clear out and redraw

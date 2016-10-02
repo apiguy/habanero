@@ -84,7 +84,15 @@ var setupMqttClient = function(creds, options){
     	var payload = m.toString();
 
     	if(typeof options.format == "undefined" || options.format == "json"){
-        	payload = util.format.tSDataToJSON(payload);
+    		if(payload.indexOf('{') === 0){
+    			try {
+			        payload = JSON.parse(payload);
+			    } catch (e) {
+			        //pass
+			    }
+    		}else{
+    			payload = util.format.tSDataToJSON(payload);
+    		}
         }
         
         var msg = merge(
