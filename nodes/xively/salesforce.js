@@ -261,6 +261,15 @@ module.exports = function (RED) {
             return;
           }
 
+          if (typeof msg.payload === 'string') { 
+            // attempt to try and parse it as JSON
+            try {
+                msg.payload = JSON.parse(msg.payload);
+            } catch (e) {
+                //ignore it
+            }
+          }
+
           var post_obt = {};
           post_obt.Xively1__Message__c = JSON.stringify(msg);
           
