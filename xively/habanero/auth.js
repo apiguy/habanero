@@ -1,6 +1,6 @@
 var when = require("when");
 var request = require('request');
-var uuid = require('node-uuid');
+var uuid = require('uuid');
 var redis = require('redis'),
     redisClient = redis.createClient({
         url: process.env.REDIS_URL
